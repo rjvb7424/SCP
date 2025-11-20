@@ -1,0 +1,7 @@
+{
+  "first_names": {
+    "male": ["Toby", "Ethan", "Noah", "Liam"],
+    "female": ["Maya", "Amelia", "Zoe", "Nora"]
+  },
+  "last_names": ["Vance", "Hale", "Mercer", "Quinn"]
+}
