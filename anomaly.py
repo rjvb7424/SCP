@@ -8,6 +8,12 @@ def generate_description():
 class Anomaly:
     def __init__(self):
         self.description = generate_description()
+        # anomaly attributes
+        self.attributes = {}
+        # combat attributes
+        self.attributes["resilience"] = random.randint(0, 20)
+        self.attributes["deception"] = random.randint(0, 20)
+        self.attributes["evasion"] = random.randint(0, 20)
     
     def get_description(self):
         return self.description
