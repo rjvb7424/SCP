@@ -1,5 +1,5 @@
 from anomaly import Anomaly
-from operation.operation import Operation
+from operation import Operation
 from personnel import Personnel
 
 anomaly = Anomaly()
