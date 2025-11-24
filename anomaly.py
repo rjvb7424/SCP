@@ -1,12 +1,18 @@
 import random
+import json
 
 def generate_description():
-    with open("anomaly_descriptions.txt", "r", encoding="utf-8") as f:
+    with open("anomaly_descriptions.txt", "r") as f:
         descriptions = [line.strip() for line in f if line.strip()]
     return random.choice(descriptions)
 
 class Anomaly:
+    with open("anomaly_names.json", "r") as f:
+        an_data = json.load(f)
+
     def __init__(self):
+        # anomaly identity
+        self.name = random.choice(self.an_data["adjectives"]) + " " + random.choice(self.an_data["nouns"])
         self.description = generate_description()
         # anomaly attributes
         self.attributes = {}
