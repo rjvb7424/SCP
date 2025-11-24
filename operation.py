@@ -1,6 +1,8 @@
 import random
 import json
 
+from anomaly import Anomaly
+
 class Operation:
     with open("code_names.json", "r") as f:
         cn_data = json.load(f)
@@ -10,3 +12,6 @@ class Operation:
 
     def __repr__(self):
         return f"{self.code_name}"
+    
+    def execute():
+        anomaly = Anomaly()
