@@ -12,7 +12,7 @@ class Anomaly:
 
     def __init__(self):
         # anomaly identity
-        self.name = random.choice(self.an_data["adjectives"]) + " " + random.choice(self.an_data["nouns"])
+        self.name = "The " + random.choice(self.an_data["adjectives"]) + " " + random.choice(self.an_data["nouns"])
         self.description = generate_description()
         # anomaly attributes
         self.attributes = {}
@@ -23,4 +23,6 @@ class Anomaly:
     
     def get_description(self):
         return self.description
-
+    
+    def __repr__(self):
+        return f"{self.name}"
