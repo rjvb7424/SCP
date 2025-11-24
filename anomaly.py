@@ -12,6 +12,7 @@ class Anomaly:
 
     def __init__(self):
         # anomaly identity
+        self.morphotype = random.choice(["humanoid", "quadrupedal"])
         self.name = "The " + random.choice(self.an_data["adjectives"]) + " " + random.choice(self.an_data["nouns"])
         self.description = generate_description()
         # anomaly attributes
