@@ -6,7 +6,7 @@ anomaly = Anomaly()
 print(anomaly.get_description())
 
 operation = Operation()
-print(operation.get_code_name())
+print(operation)
 
 person = Personnel()
 
