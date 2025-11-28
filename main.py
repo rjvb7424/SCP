@@ -1,13 +1,29 @@
-from operation import Operation
-from personnel import Personnel
-from anomaly import Anomaly
+import pygame
+import sys
 
-operation = Operation()
-print(operation)
+pygame.init()
 
-person = Personnel()
+WIDTH, HEIGHT = 800, 600
+FPS = 60
 
-print(person)
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("SCP")
 
-anomaly = Anomaly()
-print(anomaly)
+clock = pygame.time.Clock()
+
+running = True
+while running:
+    clock.tick(FPS)
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Game logic / updates go here
+
+    screen.fill((30, 30, 30))
+
+    pygame.display.flip()
+
+pygame.quit()
+sys.exit()
