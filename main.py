@@ -26,6 +26,7 @@ KEY_POSITIONS = [
     "Chief Researcher",
 ]
 
+
 def load_flag_image(path, size=(64, 40)):
     if not path:
         return None
@@ -50,11 +51,14 @@ flag_images = [load_flag_image(p.flag_path) for p in staff_roster.members]
 # --- Operations setup ---
 operations_manager = Operations(num_operations=10)
 
-# Load world map image (put a 'world_map.png' in your project folder)
+# Preload flag images for each operation (country flags)
+operation_flag_images = [load_flag_image(op.flag_path) for op in operations_manager.operations]
+
+# Load world map image (your file is world_map.jpg)
 try:
     world_map_image = pygame.image.load("world_map.jpg").convert()
 except pygame.error as e:
-    print(f"Could not load world_map.png: {e}")
+    print(f"Could not load world_map.jpg: {e}")
     world_map_image = None
 
 # Fonts
@@ -66,14 +70,14 @@ menu_font = pygame.font.Font(None, 24)
 menu_items = [
     {"name": "Personnel File", "page": "personnel", "rect": pygame.Rect(20, 5, 150, 30)},
     {"name": "Anomalies",      "page": "anomalies", "rect": pygame.Rect(190, 5, 150, 30)},
-    {"name": "Operations",     "page": "operations","rect": pygame.Rect(360, 5, 150, 30)},
+    {"name": "Operations",     "page": "operations", "rect": pygame.Rect(360, 5, 150, 30)},
 ]
 
 current_page = "personnel"
 
 # Will hold clickable zones
-staff_menu_rects = []              # for personnel chips
-operation_marker_rects = []        # for operation markers on the map
+staff_menu_rects = []       # for personnel chips
+operation_marker_rects = [] # for operation markers on the map
 
 
 def draw_text(surface, text, x, y, font, color=(220, 220, 220)):
@@ -199,6 +203,7 @@ while running:
             screen,
             world_map_image,
             operations_manager,
+            operation_flag_images,  # flag surfaces for operations
             title_font,
             body_font,
             WIDTH,
