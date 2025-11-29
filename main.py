@@ -3,6 +3,8 @@ import sys
 
 from staff import Staff
 from personnel_profile import draw_personnel_page
+from operations import Operations
+from operations_page import draw_operations_page
 
 pygame.init()
 
@@ -45,6 +47,16 @@ staff_roster = Staff(
 # Preload flag images for each member
 flag_images = [load_flag_image(p.flag_path) for p in staff_roster.members]
 
+# --- Operations setup ---
+operations_manager = Operations(num_operations=10)
+
+# Load world map image (put a 'world_map.png' in your project folder)
+try:
+    world_map_image = pygame.image.load("world_map.jpg").convert()
+except pygame.error as e:
+    print(f"Could not load world_map.png: {e}")
+    world_map_image = None
+
 # Fonts
 title_font = pygame.font.Font(None, 32)
 body_font = pygame.font.Font(None, 26)
@@ -54,12 +66,14 @@ menu_font = pygame.font.Font(None, 24)
 menu_items = [
     {"name": "Personnel File", "page": "personnel", "rect": pygame.Rect(20, 5, 150, 30)},
     {"name": "Anomalies",      "page": "anomalies", "rect": pygame.Rect(190, 5, 150, 30)},
+    {"name": "Operations",     "page": "operations","rect": pygame.Rect(360, 5, 150, 30)},
 ]
 
 current_page = "personnel"
 
-# Will hold (index, rect) for each staff “chip”
-staff_menu_rects = []
+# Will hold clickable zones
+staff_menu_rects = []              # for personnel chips
+operation_marker_rects = []        # for operation markers on the map
 
 
 def draw_text(surface, text, x, y, font, color=(220, 220, 220)):
@@ -107,7 +121,6 @@ while running:
             running = False
 
         elif event.type == pygame.VIDEORESIZE:
-            # window was resized by the user
             WIDTH, HEIGHT = event.w, event.h
             screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 
@@ -115,10 +128,18 @@ while running:
             # ESC to quit
             if event.key == pygame.K_ESCAPE:
                 running = False
+
             elif event.key == pygame.K_RIGHT:
-                staff_roster.next()
+                if current_page == "personnel":
+                    staff_roster.next()
+                elif current_page == "operations":
+                    operations_manager.next()
+
             elif event.key == pygame.K_LEFT:
-                staff_roster.previous()
+                if current_page == "personnel":
+                    staff_roster.previous()
+                elif current_page == "operations":
+                    operations_manager.previous()
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mx, my = event.pos
@@ -135,10 +156,19 @@ while running:
                         staff_roster._current_index = idx
                         break
 
+            # Operation marker clicks (only on operations page)
+            elif current_page == "operations":
+                for idx, rect in operation_marker_rects:
+                    if rect.collidepoint(mx, my):
+                        operations_manager.select(idx)
+                        break
+
     screen.fill((30, 30, 30))
 
+    # draw menu bar
     draw_menu(screen, current_page)
 
+    # draw current page content
     if current_page == "personnel":
         if len(staff_roster) > 0:
             person = staff_roster.current
@@ -160,8 +190,21 @@ while running:
             )
         else:
             staff_menu_rects = []
+
     elif current_page == "anomalies":
         draw_anomalies_page(screen)
+
+    elif current_page == "operations":
+        operation_marker_rects = draw_operations_page(
+            screen,
+            world_map_image,
+            operations_manager,
+            title_font,
+            body_font,
+            WIDTH,
+            HEIGHT,
+            MENU_HEIGHT,
+        )
 
     pygame.display.flip()
 
