@@ -1,4 +1,3 @@
-# main.py
 import pygame
 import sys
 
@@ -24,7 +23,6 @@ KEY_POSITIONS = [
     "Chief Researcher",
 ]
 
-
 def load_flag_image(path, size=(64, 40)):
     if not path:
         return None
@@ -38,12 +36,12 @@ def load_flag_image(path, size=(64, 40)):
 
 
 # --- Generate starting staff roster ---
-staff_roster = Staff(
+staff_roster = Staff (
     key_positions=KEY_POSITIONS,
     num_random=5,   # number of extra random staff
 )
 
-# Preload flag images for each member (index-aligned with roster.members)
+# Preload flag images for each member
 flag_images = [load_flag_image(p.flag_path) for p in staff_roster.members]
 
 # Fonts
@@ -57,18 +55,19 @@ menu_items = [
     {"name": "Anomalies",      "page": "anomalies", "rect": pygame.Rect(190, 5, 150, 30)},
 ]
 
-current_page = "personnel"   # which page is currently active
+current_page = "personnel"
+
+# Will hold (index, rect) for each staff “chip”
+staff_menu_rects = []
 
 
 def draw_text(surface, text, x, y, font, color=(220, 220, 220)):
-    """Draw a line of text and return the next y position."""
     text_surf = font.render(text, True, color)
     surface.blit(text_surf, (x, y))
     return y + text_surf.get_height() + 4
 
 
 def draw_menu(surface, current_page):
-    """Draw the top menu bar with tabs."""
     pygame.draw.rect(surface, (20, 20, 20), (0, 0, WIDTH, MENU_HEIGHT))
 
     for item in menu_items:
@@ -108,12 +107,21 @@ while running:
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mx, my = event.pos
+
+            # Top menu tabs
             for item in menu_items:
                 if item["rect"].collidepoint(mx, my):
                     current_page = item["page"]
 
+            # Staff selector (only on personnel page)
+            if current_page == "personnel":
+                for idx, rect in staff_menu_rects:
+                    if rect.collidepoint(mx, my):
+                        staff_roster._current_index = idx
+                        break
+
         elif event.type == pygame.KEYDOWN:
-            # Use left/right to cycle through available personnel
+            # Optional: still allow arrow keys
             if event.key == pygame.K_RIGHT:
                 staff_roster.next()
             elif event.key == pygame.K_LEFT:
@@ -121,17 +129,16 @@ while running:
 
     screen.fill((30, 30, 30))
 
-    # draw menu bar
     draw_menu(screen, current_page)
 
-    # draw current page content
     if current_page == "personnel":
         if len(staff_roster) > 0:
             person = staff_roster.current
             idx = staff_roster.current_index
             flag_image = flag_images[idx] if 0 <= idx < len(flag_images) else None
 
-            draw_personnel_page(
+            # draw_personnel_page now returns clickable rects for the staff menu
+            staff_menu_rects = draw_personnel_page(
                 screen,
                 person,
                 flag_image,
@@ -142,7 +149,10 @@ while running:
                 MENU_HEIGHT,
                 idx,
                 len(staff_roster),
+                staff_roster.members,
             )
+        else:
+            staff_menu_rects = []
     elif current_page == "anomalies":
         draw_anomalies_page(screen)
 
