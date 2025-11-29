@@ -22,12 +22,8 @@ def lerp_color(c1, c2, t: float):
     return tuple(int(c1[i] + (c2[i] - c1[i]) * t) for i in range(3))
 
 
-def get_stat_color(value, lo=0, hi=20):
-    """
-    Map a stat value (0–20) to a color:
-    very low = red, low–medium = orange,
-    medium–high = light green, high = dark green.
-    """
+def get_attribute_color(value, lo=0, hi=20):
+    """Map each attribute value to a corresponding color"""
     v = max(lo, min(hi, value))
     norm = (v - lo) / (hi - lo)
 
@@ -47,8 +43,7 @@ def get_stat_color(value, lo=0, hi=20):
         return lerp_color(light_green, dark_green, t)
 
 
-def draw_personnel_page(surface, person, flag_image, title_font, body_font,
-                        width, height, menu_height):
+def draw_personnel_page(surface, person, flag_image, title_font, body_font, width, height, menu_height):
     margin = 30
     top = menu_height + 20
     card_width = width - margin * 2
@@ -70,17 +65,16 @@ def draw_personnel_page(surface, person, flag_image, title_font, body_font,
     text_x = profile_rect.x + 20
     text_y = profile_rect.y + 15
 
-    # Name (big)
+    # personnel name
     name_text = f"{person.fname} {person.lname}"
     name_surf = title_font.render(name_text, True, (255, 255, 255))
     surface.blit(name_surf, (text_x, text_y))
     text_y += name_surf.get_height() + 8
 
-    # Info lines
+    # personnel info
     info_lines = [
-        f"Gender: {person.gender}",
+        f"Gender: {person.gender}.",
         f"Nationality: {person.nationality}",
-        f"First Language: {person.first_language}",
         f"Position: {person.position}",
     ]
 
@@ -133,7 +127,7 @@ def draw_personnel_page(surface, person, flag_image, title_font, body_font,
                 surface.blit(label_surf, (col_x, y))
 
                 value = person.attributes[attr]
-                value_color = get_stat_color(value)
+                value_color = get_attribute_color(value)
                 value_surf = body_font.render(str(value), True, value_color)
                 surface.blit(value_surf, (col_x + label_surf.get_width(), y))
 
