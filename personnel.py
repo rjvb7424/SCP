@@ -41,10 +41,14 @@ class Personnel:
         # personnel nationality
         self.nationality = random.choice(list(self._nationalities.keys()))
         # pick a first language from the nationality's language list
-        self.first_language = random.choice(self._nationalities[self.nationality]["languages"])
+        self.first_language = random.choice(
+            self._nationalities[self.nationality]["languages"]
+        )
 
         # generate first and last names based on the personnel's first language
-        self.fname = random.choice(self._names["first_names"][self.first_language][self.gender])
+        self.fname = random.choice(
+            self._names["first_names"][self.first_language][self.gender]
+        )
         self.lname = random.choice(self._names["last_names"][self.first_language])
 
         # build the flag path from the country field
@@ -63,12 +67,9 @@ class Personnel:
         secondary_attrs = set(self._positions[self.position].get("secondary", []))
 
         # attribute means (tweak these to change “role weight”)
-        # primary stats tend to be higher
-        PRIMARY_MU = 12
-        # secondary stats are slightly above average 
-        SECONDARY_MU = 10
-        # everything else is baseline
-        OTHER_MU = 8
+        PRIMARY_MU = 12   # primary stats tend to be higher
+        SECONDARY_MU = 10 # secondary stats are slightly above average
+        OTHER_MU = 8      # everything else is baseline
 
         self.attributes = {}
 
@@ -80,6 +81,13 @@ class Personnel:
             else:
                 mu = OTHER_MU
             self.attributes[attr] = self._generate_attribute(mu=mu)
+
+        # --- Mission / health state ---
+        # "Active" staff can be sent on operations.
+        # "Injured" or "KIA" staff are not selectable.
+        self.status = "Active"   # Active / Injured / KIA
+        self.alive = True
+        self.on_mission = False  # future use if you add multi-step missions
 
     def __repr__(self):
         return f"{self.fname} {self.lname}"

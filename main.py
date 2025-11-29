@@ -75,9 +75,17 @@ menu_items = [
 
 current_page = "personnel"
 
-# Will hold clickable zones
-staff_menu_rects = []       # for personnel chips
-operation_marker_rects = [] # for operation markers on the map
+# Operations UI state
+operation_mode = "view"         # "view" or "assign"
+selected_team_indices = set()   # indices into staff_roster.members
+
+# Clickable zones
+staff_menu_rects = []           # for personnel chips
+operation_marker_rects = []     # for operation markers on the map
+op_execute_rect = None
+op_cancel_rect = None
+op_confirm_rect = None
+op_staff_item_rects = []
 
 
 def draw_text(surface, text, x, y, font, color=(220, 220, 220)):
@@ -138,12 +146,16 @@ while running:
                     staff_roster.next()
                 elif current_page == "operations":
                     operations_manager.next()
+                    operation_mode = "view"
+                    selected_team_indices.clear()
 
             elif event.key == pygame.K_LEFT:
                 if current_page == "personnel":
                     staff_roster.previous()
                 elif current_page == "operations":
                     operations_manager.previous()
+                    operation_mode = "view"
+                    selected_team_indices.clear()
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mx, my = event.pos
@@ -152,20 +164,73 @@ while running:
             for item in menu_items:
                 if item["rect"].collidepoint(mx, my):
                     current_page = item["page"]
+                    if current_page != "operations":
+                        operation_mode = "view"
+                        selected_team_indices.clear()
 
-            # Staff selector (only on personnel page)
+            # Staff selector (personnel page)
             if current_page == "personnel":
                 for idx, rect in staff_menu_rects:
                     if rect.collidepoint(mx, my):
                         staff_roster._current_index = idx
                         break
 
-            # Operation marker clicks (only on operations page)
+            # Operations page interactions
             elif current_page == "operations":
+                # Click markers on the map (select operation)
                 for idx, rect in operation_marker_rects:
                     if rect.collidepoint(mx, my):
                         operations_manager.select(idx)
+                        operation_mode = "view"
+                        selected_team_indices.clear()
                         break
+
+                # VIEW MODE: click Execute
+                if operation_mode == "view":
+                    if op_execute_rect and op_execute_rect.collidepoint(mx, my):
+                        op = operations_manager.current
+                        if op and op.status == "Available":
+                            any_active = any(
+                                getattr(p, "status", "Active") == "Active"
+                                for p in staff_roster.members
+                            )
+                            if any_active:
+                                operation_mode = "assign"
+                                selected_team_indices.clear()
+
+                # ASSIGN MODE: select staff / confirm / cancel
+                elif operation_mode == "assign":
+                    # Toggle staff selection
+                    for s_idx, rect in op_staff_item_rects:
+                        if rect.collidepoint(mx, my):
+                            person = staff_roster.members[s_idx]
+                            if getattr(person, "status", "Active") == "Active":
+                                if s_idx in selected_team_indices:
+                                    selected_team_indices.remove(s_idx)
+                                else:
+                                    selected_team_indices.add(s_idx)
+                            break
+
+                    # Cancel assignment
+                    if op_cancel_rect and op_cancel_rect.collidepoint(mx, my):
+                        operation_mode = "view"
+                        selected_team_indices.clear()
+
+                    # Confirm & launch mission
+                    elif op_confirm_rect and op_confirm_rect.collidepoint(mx, my):
+                        if selected_team_indices:
+                            team = []
+                            for s_idx in selected_team_indices:
+                                if 0 <= s_idx < len(staff_roster.members):
+                                    person = staff_roster.members[s_idx]
+                                    if getattr(person, "status", "Active") == "Active":
+                                        team.append(person)
+                            if team:
+                                op = operations_manager.current
+                                if op:
+                                    op.simulate(team)
+                        operation_mode = "view"
+                        selected_team_indices.clear()
 
     screen.fill((30, 30, 30))
 
@@ -199,11 +264,20 @@ while running:
         draw_anomalies_page(screen)
 
     elif current_page == "operations":
-        operation_marker_rects = draw_operations_page(
+        (
+            operation_marker_rects,
+            op_execute_rect,
+            op_cancel_rect,
+            op_confirm_rect,
+            op_staff_item_rects,
+        ) = draw_operations_page(
             screen,
             world_map_image,
             operations_manager,
-            operation_flag_images,  # flag surfaces for operations
+            operation_flag_images,
+            staff_roster,
+            operation_mode,
+            selected_team_indices,
             title_font,
             body_font,
             WIDTH,
