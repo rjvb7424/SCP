@@ -2,6 +2,7 @@ import pygame
 import sys
 
 from personnel import Personnel
+from personnel_profile import draw_personnel_page
 
 pygame.init()
 
@@ -47,51 +48,14 @@ def draw_text(surface, text, x, y, font, color=(220, 220, 220)):
     return y + text_surf.get_height() + 4
 
 
-def lerp_color(c1, c2, t: float):
-    """Linearly interpolate between two RGB colors c1 -> c2 with t in [0, 1]."""
-    return tuple(int(c1[i] + (c2[i] - c1[i]) * t) for i in range(3))
-
-
-def get_stat_color(value, lo=0, hi=20):
-    """
-    Map a stat value (0–20) to a color:
-    very low = red, low–medium = orange,
-    medium–high = light green, high = dark green.
-    """
-    # clamp
-    v = max(lo, min(hi, value))
-    norm = (v - lo) / (hi - lo)  # 0.0 -> 1.0
-
-    # anchor colors
-    red         = (220, 50, 50)
-    orange      = (230, 150, 50)
-    light_green = (180, 230, 100)
-    dark_green  = (20, 180, 80)
-
-    # 0.0–0.33: red -> orange
-    # 0.33–0.66: orange -> light green
-    # 0.66–1.0: light green -> dark green
-    if norm < 1/3:
-        t = norm / (1/3)
-        return lerp_color(red, orange, t)
-    elif norm < 2/3:
-        t = (norm - 1/3) / (1/3)
-        return lerp_color(orange, light_green, t)
-    else:
-        t = (norm - 2/3) / (1/3)
-        return lerp_color(light_green, dark_green, t)
-
-
 def draw_menu(surface, current_page):
     """Draw the top menu bar with tabs."""
-    # background bar
     pygame.draw.rect(surface, (20, 20, 20), (0, 0, WIDTH, MENU_HEIGHT))
 
     for item in menu_items:
         is_active = (item["page"] == current_page)
         rect = item["rect"]
 
-        # Different color if this tab is selected
         bg = (60, 60, 60) if is_active else (40, 40, 40)
         border = (120, 120, 120)
 
@@ -103,121 +67,16 @@ def draw_menu(surface, current_page):
         surface.blit(text_surf, text_rect)
 
 
-def draw_personnel_page(surface):
-    margin = 30
-    top = MENU_HEIGHT + 20
-    card_width = WIDTH - margin * 2
-
-    # --- Page title ---
-    title_text = "Personnel Profile"
-    title_surf = title_font.render(title_text, True, (255, 255, 255))
-    surface.blit(title_surf, (margin, top))
-    top += title_surf.get_height() + 10
-
-    # --- Profile card (name, identity, flag) ---
-    profile_height = 150
-    profile_rect = pygame.Rect(margin, top, card_width, profile_height)
-
-    pygame.draw.rect(surface, (40, 40, 40), profile_rect, border_radius=8)
-    pygame.draw.rect(surface, (90, 90, 90), profile_rect, width=1, border_radius=8)
-
-    inner_x = profile_rect.x + 20
-    inner_y = profile_rect.y + 15
-
-    # Name (bigger)
-    name_text = f"{person.fname} {person.lname}"
-    name_surf = title_font.render(name_text, True, (255, 255, 255))
-    surface.blit(name_surf, (inner_x, inner_y))
-    inner_y += name_surf.get_height() + 8
-
-    # Gender
-    gender_surf = body_font.render(f"Gender: {person.gender}", True, (220, 220, 220))
-    surface.blit(gender_surf, (inner_x, inner_y))
-    inner_y += gender_surf.get_height() + 4
-
-    # Nationality + flag
-    nat_text = f"Nationality: {person.nationality}"
-    nat_surf = body_font.render(nat_text, True, (220, 220, 220))
-    nat_pos = (inner_x, inner_y)
-    surface.blit(nat_surf, nat_pos)
-
-    if flag_image is not None:
-        flag_rect = flag_image.get_rect()
-        flag_rect.midleft = (
-            nat_pos[0] + nat_surf.get_width() + 10,
-            nat_pos[1] + nat_surf.get_height() // 2,
-        )
-        surface.blit(flag_image, flag_rect)
-
-    inner_y += nat_surf.get_height() + 4
-
-    # First language and position
-    lang_surf = body_font.render(f"First Language: {person.first_language}", True, (220, 220, 220))
-    surface.blit(lang_surf, (inner_x, inner_y))
-    inner_y += lang_surf.get_height() + 4
-
-    pos_surf = body_font.render(f"Position: {person.position}", True, (220, 220, 220))
-    surface.blit(pos_surf, (inner_x, inner_y))
-
-    # --- Attributes panel ---
-    attrs_top = profile_rect.bottom + 20
-    attrs_rect = pygame.Rect(margin, attrs_top, card_width, HEIGHT - attrs_top - margin)
-
-    pygame.draw.rect(surface, (40, 40, 40), attrs_rect, border_radius=8)
-    pygame.draw.rect(surface, (90, 90, 90), attrs_rect, width=1, border_radius=8)
-
-    attrs_title_surf = body_font.render("Attributes", True, (255, 255, 255))
-    surface.blit(attrs_title_surf, (attrs_rect.x + 20, attrs_rect.y + 10))
-
-    # Two-column layout for attributes
-    attrs = sorted(person.attributes.items())  # list of (name, value)
-    half = (len(attrs) + 1) // 2
-    left_attrs = attrs[:half]
-    right_attrs = attrs[half:]
-
-    line_height = body_font.get_linesize() + 4
-    left_x = attrs_rect.x + 20
-    right_x = attrs_rect.x + attrs_rect.width // 2 + 10
-    start_y = attrs_rect.y + 40
-
-    # Left column
-    y_left = start_y
-    for attr_name, value in left_attrs:
-        label = f"{attr_name.replace('_', ' ').title()}: "
-        label_surf = body_font.render(label, True, (220, 220, 220))
-        surface.blit(label_surf, (left_x, y_left))
-
-        value_color = get_stat_color(value)
-        value_surf = body_font.render(str(value), True, value_color)
-        surface.blit(value_surf, (left_x + label_surf.get_width(), y_left))
-
-        y_left += line_height
-
-    # Right column
-    y_right = start_y
-    for attr_name, value in right_attrs:
-        label = f"{attr_name.replace('_', ' ').title()}: "
-        label_surf = body_font.render(label, True, (220, 220, 220))
-        surface.blit(label_surf, (right_x, y_right))
-
-        value_color = get_stat_color(value)
-        value_surf = body_font.render(str(value), True, value_color)
-        surface.blit(value_surf, (right_x + label_surf.get_width(), y_right))
-
-        y_right += line_height
-
-
 def draw_anomalies_page(surface):
     x = 40
     y = MENU_HEIGHT + 20
 
     y = draw_text(surface, "Contained Anomalies", x, y, body_font, (255, 255, 255))
     y += 10
-    # placeholder content
     y = draw_text(surface, "- SCP-173: Euclid", x, y, body_font)
     y = draw_text(surface, "- SCP-049: Euclid", x, y, body_font)
     y = draw_text(surface, "- SCP-682: Keter", x, y, body_font)
-    # later you can turn this into a proper list from your own classes
+    # later: replace with real anomaly list
 
 
 running = True
@@ -230,7 +89,6 @@ while running:
 
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mx, my = event.pos
-            # check if you clicked any of the menu items
             for item in menu_items:
                 if item["rect"].collidepoint(mx, my):
                     current_page = item["page"]
@@ -242,7 +100,16 @@ while running:
 
     # draw current page content
     if current_page == "personnel":
-        draw_personnel_page(screen)
+        draw_personnel_page(
+            screen,
+            person,
+            flag_image,
+            title_font,
+            body_font,
+            WIDTH,
+            HEIGHT,
+            MENU_HEIGHT,
+        )
     elif current_page == "anomalies":
         draw_anomalies_page(screen)
 
