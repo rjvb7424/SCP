@@ -36,6 +36,41 @@ def draw_text(surface, text, x, y, font, color=(220, 220, 220)):
     return y + text_surf.get_height() + 4
 
 
+def lerp_color(c1, c2, t: float):
+    """Linearly interpolate between two RGB colors c1 -> c2 with t in [0, 1]."""
+    return tuple(int(c1[i] + (c2[i] - c1[i]) * t) for i in range(3))
+
+
+def get_stat_color(value, lo=0, hi=20):
+    """
+    Map a stat value (0–20) to a color:
+    very low = red, low–medium = orange,
+    medium–high = light green, high = dark green.
+    """
+    # clamp
+    v = max(lo, min(hi, value))
+    norm = (v - lo) / (hi - lo)  # 0.0 -> 1.0
+
+    # anchor colors
+    red         = (220, 50, 50)
+    orange      = (230, 150, 50)
+    light_green = (180, 230, 100)
+    dark_green  = (20, 180, 80)
+
+    # 0.0–0.33: red -> orange
+    # 0.33–0.66: orange -> light green
+    # 0.66–1.0: light green -> dark green
+    if norm < 1/3:
+        t = norm / (1/3)
+        return lerp_color(red, orange, t)
+    elif norm < 2/3:
+        t = (norm - 1/3) / (1/3)
+        return lerp_color(orange, light_green, t)
+    else:
+        t = (norm - 2/3) / (1/3)
+        return lerp_color(light_green, dark_green, t)
+
+
 def draw_menu(surface, current_page):
     """Draw the top menu bar with tabs."""
     # background bar
@@ -70,8 +105,21 @@ def draw_personnel_page(surface):
 
     for attr_name in sorted(person.attributes.keys()):
         value = person.attributes[attr_name]
-        line = f" - {attr_name.replace('_', ' ').title()}: {value}"
-        y = draw_text(surface, line, x, y, body_font)
+        label = f" - {attr_name.replace('_', ' ').title()}: "
+
+        # draw the label part in neutral grey
+        label_surf = body_font.render(label, True, (220, 220, 220))
+        surface.blit(label_surf, (x, y))
+
+        # compute color for the value based on magnitude
+        value_color = get_stat_color(value)
+        value_surf = body_font.render(str(value), True, value_color)
+
+        # draw the value right after the label
+        surface.blit(value_surf, (x + label_surf.get_width(), y))
+
+        # move to next line
+        y += label_surf.get_height() + 4
 
 
 def draw_anomalies_page(surface):
