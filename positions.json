@@ -1,0 +1,114 @@
+{
+    "Site Director": {
+        "primary": ["leadership", "planning", "negotiation"],
+        "secondary": ["logistics", "anomaly_knowledge", "adaptability", "determination", "psychology"]
+    },
+    "Deputy Site Director": {
+        "primary": ["planning", "leadership"],
+        "secondary": ["logistics", "negotiation", "adaptability", "anomaly_knowledge"]
+    },
+    "Containment Operations Chief": {
+        "primary": ["planning", "anomaly_knowledge", "situational_awareness"],
+        "secondary": ["leadership", "logistics", "analytical_thinking", "determination"]
+    },
+    "Duty Officer": {
+        "primary": ["situational_awareness", "planning", "adaptability"],
+        "secondary": ["leadership", "logistics", "anomaly_knowledge"]
+    },
+    "Containment Specialist": {
+        "primary": ["anomaly_knowledge", "situational_awareness", "analytical_thinking"],
+        "secondary": ["planning", "data_collection", "adaptability"]
+    },
+    "Anomaly Handler": {
+        "primary": ["situational_awareness", "adaptability", "anomaly_knowledge"],
+        "secondary": ["data_collection", "determination", "psychology"]
+    },
+    "Field Containment Agent": {
+        "primary": ["marksmanship", "situational_awareness", "physical_fitness"],
+        "secondary": ["adaptability", "determination", "first_aid", "logistics"]
+    },
+    "Head of Security": {
+        "primary": ["leadership", "situational_awareness", "planning"],
+        "secondary": ["marksmanship", "physical_fitness", "determination", "logistics"]
+    },
+    "Security Officer": {
+        "primary": ["situational_awareness", "marksmanship", "physical_fitness"],
+        "secondary": ["determination", "adaptability", "first_aid"]
+    },
+    "MTF Commander": {
+        "primary": ["leadership", "situational_awareness", "planning"],
+        "secondary": ["marksmanship", "physical_fitness", "determination", "logistics"]
+    },
+    "Tactical Response Operator": {
+        "primary": ["marksmanship", "physical_fitness", "situational_awareness"],
+        "secondary": ["determination", "adaptability", "first_aid"]
+    },
+    "Armory Quartermaster": {
+        "primary": ["logistics", "situational_awareness"],
+        "secondary": ["planning", "analytical_thinking", "determination"]
+    },
+    "Chief Researcher": {
+        "primary": ["analytical_thinking", "anomaly_knowledge", "planning"],
+        "secondary": ["data_collection", "adaptability", "leadership"]
+    },
+    "Senior Researcher": {
+        "primary": ["analytical_thinking", "anomaly_knowledge", "data_collection"],
+        "secondary": ["planning", "adaptability", "determination"]
+    },
+    "Junior Researcher": {
+        "primary": ["data_collection", "analytical_thinking"],
+        "secondary": ["anomaly_knowledge", "adaptability"]
+    },
+    "Paratech Engineer": {
+        "primary": ["analytical_thinking", "anomaly_knowledge"],
+        "secondary": ["planning", "data_collection", "adaptability"]
+    },
+    "Cross-Testing Coordinator": {
+        "primary": ["planning", "analytical_thinking", "anomaly_knowledge"],
+        "secondary": ["data_collection", "situational_awareness", "adaptability"]
+    },
+    "Chief Medical Officer": {
+        "primary": ["surgery", "leadership", "planning"],
+        "secondary": ["psychology", "first_aid", "determination"]
+    },
+    "Staff Physician": {
+        "primary": ["surgery", "first_aid"],
+        "secondary": ["psychology", "determination", "adaptability"]
+    },
+    "Psychiatrist": {
+        "primary": ["psychology", "negotiation"],
+        "secondary": ["adaptability", "anomaly_knowledge", "leadership"]
+    },
+    "Class-D Coordinator": {
+        "primary": ["logistics", "leadership", "psychology"],
+        "secondary": ["planning", "determination", "negotiation"]
+    },
+    "Logistics Officer": {
+        "primary": ["logistics", "planning"],
+        "secondary": ["leadership", "adaptability", "determination"]
+    },
+    "Chief Engineer": {
+        "primary": ["planning", "logistics", "analytical_thinking"],
+        "secondary": ["leadership", "determination"]
+    },
+    "Records & Archives Manager": {
+        "primary": ["data_collection", "planning"],
+        "secondary": ["analytical_thinking", "adaptability"]
+    },
+    "Intelligence Director": {
+        "primary": ["analytical_thinking", "negotiation", "planning"],
+        "secondary": ["situational_awareness", "adaptability", "leadership"]
+    },
+    "Field Intelligence Agent": {
+        "primary": ["situational_awareness", "adaptability", "negotiation"],
+        "secondary": ["analytical_thinking", "determination", "physical_fitness"]
+    },
+    "Counterintelligence Officer": {
+        "primary": ["situational_awareness", "analytical_thinking"],
+        "secondary": ["psychology", "adaptability", "determination"]
+    },
+    "Surveillance Technician": {
+        "primary": ["situational_awareness", "data_collection"],
+        "secondary": ["analytical_thinking", "planning"]
+    }
+}
