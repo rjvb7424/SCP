@@ -1,7 +1,8 @@
+# main.py
 import pygame
 import sys
 
-from personnel import Personnel
+from staff import Staff
 from personnel_profile import draw_personnel_page
 
 pygame.init()
@@ -15,17 +16,35 @@ pygame.display.set_caption("SCP")
 
 clock = pygame.time.Clock()
 
-person = Personnel()
+# --- Positions that must always exist at game start ---
+# Make sure these match keys in positions.json
+KEY_POSITIONS = [
+    "Site Director",
+    "Chief of Security",
+    "Chief Researcher",
+]
 
-# Load flag image once, based on the person's nationality
-flag_image = None
-if getattr(person, "flag_path", None):
+
+def load_flag_image(path, size=(64, 40)):
+    if not path:
+        return None
     try:
-        flag_image = pygame.image.load(person.flag_path).convert_alpha()
-        flag_image = pygame.transform.smoothscale(flag_image, (64, 40))
+        flag_img = pygame.image.load(path).convert_alpha()
+        flag_img = pygame.transform.smoothscale(flag_img, size)
+        return flag_img
     except pygame.error as e:
-        print(f"Could not load flag image {person.flag_path}: {e}")
-        flag_image = None
+        print(f"Could not load flag image {path}: {e}")
+        return None
+
+
+# --- Generate starting staff roster ---
+staff_roster = Staff(
+    key_positions=KEY_POSITIONS,
+    num_random=5,   # number of extra random staff
+)
+
+# Preload flag images for each member (index-aligned with roster.members)
+flag_images = [load_flag_image(p.flag_path) for p in staff_roster.members]
 
 # Fonts
 title_font = pygame.font.Font(None, 32)
@@ -93,6 +112,13 @@ while running:
                 if item["rect"].collidepoint(mx, my):
                     current_page = item["page"]
 
+        elif event.type == pygame.KEYDOWN:
+            # Use left/right to cycle through available personnel
+            if event.key == pygame.K_RIGHT:
+                staff_roster.next()
+            elif event.key == pygame.K_LEFT:
+                staff_roster.previous()
+
     screen.fill((30, 30, 30))
 
     # draw menu bar
@@ -100,16 +126,23 @@ while running:
 
     # draw current page content
     if current_page == "personnel":
-        draw_personnel_page(
-            screen,
-            person,
-            flag_image,
-            title_font,
-            body_font,
-            WIDTH,
-            HEIGHT,
-            MENU_HEIGHT,
-        )
+        if len(staff_roster) > 0:
+            person = staff_roster.current
+            idx = staff_roster.current_index
+            flag_image = flag_images[idx] if 0 <= idx < len(flag_images) else None
+
+            draw_personnel_page(
+                screen,
+                person,
+                flag_image,
+                title_font,
+                body_font,
+                WIDTH,
+                HEIGHT,
+                MENU_HEIGHT,
+                idx,
+                len(staff_roster),
+            )
     elif current_page == "anomalies":
         draw_anomalies_page(screen)
 

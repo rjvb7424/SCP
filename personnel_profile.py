@@ -1,3 +1,4 @@
+# personnel_profile.py
 import pygame
 
 # Attribute groups for display
@@ -43,7 +44,18 @@ def get_attribute_color(value, lo=0, hi=20):
         return lerp_color(light_green, dark_green, t)
 
 
-def draw_personnel_page(surface, person, flag_image, title_font, body_font, width, height, menu_height):
+def draw_personnel_page(
+    surface,
+    person,
+    flag_image,
+    title_font,
+    body_font,
+    width,
+    height,
+    menu_height,
+    index,  # current index
+    total,  # total staff
+):
     margin = 30
     top = menu_height + 20
     card_width = width - margin * 2
@@ -52,7 +64,16 @@ def draw_personnel_page(surface, person, flag_image, title_font, body_font, widt
     title_text = "Personnel Profile"
     title_surf = title_font.render(title_text, True, (255, 255, 255))
     surface.blit(title_surf, (margin, top))
-    top += title_surf.get_height() + 10
+    top += title_surf.get_height() + 4
+
+    # --- Roster info / hint ---
+    if total > 1:
+        hint_text = f"{index + 1} / {total}   (Use \u2190 / \u2192 to change)"
+        hint_surf = body_font.render(hint_text, True, (180, 180, 180))
+        surface.blit(hint_surf, (margin, top))
+        top += hint_surf.get_height() + 6
+    else:
+        top += 6
 
     # --- Profile card ---
     profile_height = 160
@@ -100,7 +121,6 @@ def draw_personnel_page(surface, person, flag_image, title_font, body_font, widt
     header_surf = body_font.render("Attributes", True, (255, 255, 255))
     surface.blit(header_surf, (attrs_rect.x + 20, attrs_rect.y + 10))
 
-    # Grouped attributes: Administrative / Combat / Research / Mental / Medical
     group_items = list(ATTRIBUTE_GROUPS.items())
     left_groups = group_items[:3]
     right_groups = group_items[3:]
@@ -113,12 +133,10 @@ def draw_personnel_page(surface, person, flag_image, title_font, body_font, widt
     def draw_group_column(groups, col_x):
         y = start_y
         for group_name, attrs in groups:
-            # Group title
             group_surf = body_font.render(group_name, True, (255, 255, 255))
             surface.blit(group_surf, (col_x, y))
             y += group_surf.get_height() + 2
 
-            # Attributes in that group
             for attr in attrs:
                 if attr not in person.attributes:
                     continue

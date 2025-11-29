@@ -1,5 +1,7 @@
+# personnel.py
 import random
 import json
+
 
 class Personnel:
     with open("nationalities.json", "r") as f:
@@ -32,26 +34,34 @@ class Personnel:
         value = max(lo, min(hi, value))
         return int(value)
 
-    def __init__(self):
+    def __init__(self, position=None):
         # personnel identity
         self.gender = random.choice(["male", "female"])
+
         # personnel nationality
         self.nationality = random.choice(list(self._nationalities.keys()))
         # pick a first language from the nationality's language list
         self.first_language = random.choice(self._nationalities[self.nationality]["languages"])
+
         # generate first and last names based on the personnel's first language
         self.fname = random.choice(self._names["first_names"][self.first_language][self.gender])
         self.lname = random.choice(self._names["last_names"][self.first_language])
+
         # build the flag path from the country field
         country = self._nationalities[self.nationality]["country"]
         country_for_file = country.replace(" ", "_")
         self.flag_path = f"flags/Flag_of_{country_for_file}.png"
 
         # personnel position and attributes
-        self.position = random.choice(list(self._positions.keys()))
+        if position is not None and position in self._positions:
+            self.position = position
+        else:
+            self.position = random.choice(list(self._positions.keys()))
+
         # get the primary and secondary attributes for this position
         primary_attrs = set(self._positions[self.position].get("primary", []))
         secondary_attrs = set(self._positions[self.position].get("secondary", []))
+
         # attribute means (tweak these to change “role weight”)
         # primary stats tend to be higher
         PRIMARY_MU = 12
