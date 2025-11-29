@@ -6,17 +6,18 @@ from personnel_profile import draw_personnel_page
 
 pygame.init()
 
-WIDTH, HEIGHT = 800, 600
 FPS = 60
 MENU_HEIGHT = 40
 
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+# --- START "FULLSCREEN-SIZED" BUT RESIZABLE ---
+info = pygame.display.Info()
+WIDTH, HEIGHT = info.current_w, info.current_h  # start at monitor size
+screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
 pygame.display.set_caption("SCP")
 
 clock = pygame.time.Clock()
 
 # --- Positions that must always exist at game start ---
-# Make sure these match keys in positions.json
 KEY_POSITIONS = [
     "Site Director",
     "Chief of Security",
@@ -36,7 +37,7 @@ def load_flag_image(path, size=(64, 40)):
 
 
 # --- Generate starting staff roster ---
-staff_roster = Staff (
+staff_roster = Staff(
     key_positions=KEY_POSITIONS,
     num_random=5,   # number of extra random staff
 )
@@ -105,6 +106,20 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
+        elif event.type == pygame.VIDEORESIZE:
+            # window was resized by the user
+            WIDTH, HEIGHT = event.w, event.h
+            screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+
+        elif event.type == pygame.KEYDOWN:
+            # ESC to quit
+            if event.key == pygame.K_ESCAPE:
+                running = False
+            elif event.key == pygame.K_RIGHT:
+                staff_roster.next()
+            elif event.key == pygame.K_LEFT:
+                staff_roster.previous()
+
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mx, my = event.pos
 
@@ -120,13 +135,6 @@ while running:
                         staff_roster._current_index = idx
                         break
 
-        elif event.type == pygame.KEYDOWN:
-            # Optional: still allow arrow keys
-            if event.key == pygame.K_RIGHT:
-                staff_roster.next()
-            elif event.key == pygame.K_LEFT:
-                staff_roster.previous()
-
     screen.fill((30, 30, 30))
 
     draw_menu(screen, current_page)
@@ -137,7 +145,6 @@ while running:
             idx = staff_roster.current_index
             flag_image = flag_images[idx] if 0 <= idx < len(flag_images) else None
 
-            # draw_personnel_page now returns clickable rects for the staff menu
             staff_menu_rects = draw_personnel_page(
                 screen,
                 person,
