@@ -16,6 +16,16 @@ clock = pygame.time.Clock()
 
 person = Personnel()
 
+# Load flag image once, based on the person's nationality
+flag_image = None
+if getattr(person, "flag_path", None):
+    try:
+        flag_image = pygame.image.load(person.flag_path).convert_alpha()
+        flag_image = pygame.transform.smoothscale(flag_image, (64, 40))
+    except pygame.error as e:
+        print(f"Could not load flag image {person.flag_path}: {e}")
+        flag_image = None
+
 # Fonts
 body_font = pygame.font.Font(None, 26)
 menu_font = pygame.font.Font(None, 24)
@@ -99,9 +109,28 @@ def draw_personnel_page(surface):
     y = draw_text(surface, "Personnel File", x, y, body_font, (255, 255, 255))
     y = draw_text(surface, f"Name: {person.fname} {person.lname}", x, y, body_font)
     y = draw_text(surface, f"Gender: {person.gender}", x, y, body_font)
+
+    # Nationality line with flag
+    nationality_text = f"Nationality: {person.nationality}"
+    nat_surf = body_font.render(nationality_text, True, (220, 220, 220))
+    surface.blit(nat_surf, (x, y))
+
+    # draw the flag to the right of the nationality text
+    if flag_image is not None:
+        flag_rect = flag_image.get_rect()
+        # place flag slightly to the right, vertically centered on the text line
+        flag_rect.midleft = (x + nat_surf.get_width() + 10,
+                             y + nat_surf.get_height() // 2)
+        surface.blit(flag_image, flag_rect)
+
+    y += nat_surf.get_height() + 4
+
+    # First language + position
+    y = draw_text(surface, f"First Language: {person.first_language}", x, y, body_font)
     y = draw_text(surface, f"Position: {person.position}", x, y, body_font)
     y += 10
 
+    # Attributes
     y = draw_text(surface, "Attributes:", x, y, body_font, (255, 255, 255))
 
     for attr_name in sorted(person.attributes.keys()):

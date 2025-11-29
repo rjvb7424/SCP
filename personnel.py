@@ -35,26 +35,35 @@ class Personnel:
     def __init__(self):
         # personnel identity
         self.gender = random.choice(["male", "female"])
+
         # personnel nationality
         self.nationality = random.choice(list(self._nationalities.keys()))
-        # pick a first language from a list of languages from that nationality
-        self.first_language = random.choice(self._nationalities[self.nationality]["languages"])
-        # generate first and last names based on the personnels first language
+        nat_info = self._nationalities[self.nationality]
+
+        # pick a first language from the nationality's language list
+        self.first_language = random.choice(nat_info["languages"])
+
+        # generate first and last names based on the personnel's first language
         self.fname = random.choice(self._names["first_names"][self.first_language][self.gender])
         self.lname = random.choice(self._names["last_names"][self.first_language])
 
-        # personnel attributes and position
+        # build the flag path from the *country* field
+        # e.g. "United States" -> "flags/Flag_of_United_States.png"
+        country = nat_info["country"]
+        country_for_file = country.replace(" ", "_")
+        self.flag_path = f"flags/Flag_of_{country_for_file}.png"
+
+        # personnel position
         self.position = random.choice(list(self._positions.keys()))
+
         # get the primary and secondary attributes for this position
         primary_attrs = set(self._positions[self.position].get("primary", []))
         secondary_attrs = set(self._positions[self.position].get("secondary", []))
+
         # attribute means (tweak these to change “role weight”)
-        # primary stats tend to be higher
-        PRIMARY_MU = 12 
-        # secondary stats are slightly above average  
-        SECONDARY_MU = 10
-        # everything else is baseline
-        OTHER_MU = 8      
+        PRIMARY_MU = 12   # primary stats tend to be higher
+        SECONDARY_MU = 10 # secondary stats are slightly above average
+        OTHER_MU = 8      # everything else is baseline
 
         self.attributes = {}
 
