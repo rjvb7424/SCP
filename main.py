@@ -99,6 +99,7 @@ def draw_personnel_page(surface):
     y = draw_text(surface, "Personnel File", x, y, body_font, (255, 255, 255))
     y = draw_text(surface, f"Name: {person.fname} {person.lname}", x, y, body_font)
     y = draw_text(surface, f"Gender: {person.gender}", x, y, body_font)
+    y = draw_text(surface, f"Position: {person.position}", x, y, body_font)
     y += 10
 
     y = draw_text(surface, "Attributes:", x, y, body_font, (255, 255, 255))
