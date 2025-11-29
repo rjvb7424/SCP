@@ -27,6 +27,7 @@ if getattr(person, "flag_path", None):
         flag_image = None
 
 # Fonts
+title_font = pygame.font.Font(None, 32)
 body_font = pygame.font.Font(None, 26)
 menu_font = pygame.font.Font(None, 24)
 
@@ -103,53 +104,107 @@ def draw_menu(surface, current_page):
 
 
 def draw_personnel_page(surface):
-    x = 40
-    y = MENU_HEIGHT + 20  # start below the menu
+    margin = 30
+    top = MENU_HEIGHT + 20
+    card_width = WIDTH - margin * 2
 
-    y = draw_text(surface, "Personnel File", x, y, body_font, (255, 255, 255))
-    y = draw_text(surface, f"Name: {person.fname} {person.lname}", x, y, body_font)
-    y = draw_text(surface, f"Gender: {person.gender}", x, y, body_font)
+    # --- Page title ---
+    title_text = "Personnel Profile"
+    title_surf = title_font.render(title_text, True, (255, 255, 255))
+    surface.blit(title_surf, (margin, top))
+    top += title_surf.get_height() + 10
 
-    # Nationality line with flag
-    nationality_text = f"Nationality: {person.nationality}"
-    nat_surf = body_font.render(nationality_text, True, (220, 220, 220))
-    surface.blit(nat_surf, (x, y))
+    # --- Profile card (name, identity, flag) ---
+    profile_height = 150
+    profile_rect = pygame.Rect(margin, top, card_width, profile_height)
 
-    # draw the flag to the right of the nationality text
+    pygame.draw.rect(surface, (40, 40, 40), profile_rect, border_radius=8)
+    pygame.draw.rect(surface, (90, 90, 90), profile_rect, width=1, border_radius=8)
+
+    inner_x = profile_rect.x + 20
+    inner_y = profile_rect.y + 15
+
+    # Name (bigger)
+    name_text = f"{person.fname} {person.lname}"
+    name_surf = title_font.render(name_text, True, (255, 255, 255))
+    surface.blit(name_surf, (inner_x, inner_y))
+    inner_y += name_surf.get_height() + 8
+
+    # Gender
+    gender_surf = body_font.render(f"Gender: {person.gender}", True, (220, 220, 220))
+    surface.blit(gender_surf, (inner_x, inner_y))
+    inner_y += gender_surf.get_height() + 4
+
+    # Nationality + flag
+    nat_text = f"Nationality: {person.nationality}"
+    nat_surf = body_font.render(nat_text, True, (220, 220, 220))
+    nat_pos = (inner_x, inner_y)
+    surface.blit(nat_surf, nat_pos)
+
     if flag_image is not None:
         flag_rect = flag_image.get_rect()
-        # place flag slightly to the right, vertically centered on the text line
-        flag_rect.midleft = (x + nat_surf.get_width() + 10,
-                             y + nat_surf.get_height() // 2)
+        flag_rect.midleft = (
+            nat_pos[0] + nat_surf.get_width() + 10,
+            nat_pos[1] + nat_surf.get_height() // 2,
+        )
         surface.blit(flag_image, flag_rect)
 
-    y += nat_surf.get_height() + 4
+    inner_y += nat_surf.get_height() + 4
 
-    # First language + position
-    y = draw_text(surface, f"First Language: {person.first_language}", x, y, body_font)
-    y = draw_text(surface, f"Position: {person.position}", x, y, body_font)
-    y += 10
+    # First language and position
+    lang_surf = body_font.render(f"First Language: {person.first_language}", True, (220, 220, 220))
+    surface.blit(lang_surf, (inner_x, inner_y))
+    inner_y += lang_surf.get_height() + 4
 
-    # Attributes
-    y = draw_text(surface, "Attributes:", x, y, body_font, (255, 255, 255))
+    pos_surf = body_font.render(f"Position: {person.position}", True, (220, 220, 220))
+    surface.blit(pos_surf, (inner_x, inner_y))
 
-    for attr_name in sorted(person.attributes.keys()):
-        value = person.attributes[attr_name]
-        label = f" - {attr_name.replace('_', ' ').title()}: "
+    # --- Attributes panel ---
+    attrs_top = profile_rect.bottom + 20
+    attrs_rect = pygame.Rect(margin, attrs_top, card_width, HEIGHT - attrs_top - margin)
 
-        # draw the label part in neutral grey
+    pygame.draw.rect(surface, (40, 40, 40), attrs_rect, border_radius=8)
+    pygame.draw.rect(surface, (90, 90, 90), attrs_rect, width=1, border_radius=8)
+
+    attrs_title_surf = body_font.render("Attributes", True, (255, 255, 255))
+    surface.blit(attrs_title_surf, (attrs_rect.x + 20, attrs_rect.y + 10))
+
+    # Two-column layout for attributes
+    attrs = sorted(person.attributes.items())  # list of (name, value)
+    half = (len(attrs) + 1) // 2
+    left_attrs = attrs[:half]
+    right_attrs = attrs[half:]
+
+    line_height = body_font.get_linesize() + 4
+    left_x = attrs_rect.x + 20
+    right_x = attrs_rect.x + attrs_rect.width // 2 + 10
+    start_y = attrs_rect.y + 40
+
+    # Left column
+    y_left = start_y
+    for attr_name, value in left_attrs:
+        label = f"{attr_name.replace('_', ' ').title()}: "
         label_surf = body_font.render(label, True, (220, 220, 220))
-        surface.blit(label_surf, (x, y))
+        surface.blit(label_surf, (left_x, y_left))
 
-        # compute color for the value based on magnitude
         value_color = get_stat_color(value)
         value_surf = body_font.render(str(value), True, value_color)
+        surface.blit(value_surf, (left_x + label_surf.get_width(), y_left))
 
-        # draw the value right after the label
-        surface.blit(value_surf, (x + label_surf.get_width(), y))
+        y_left += line_height
 
-        # move to next line
-        y += label_surf.get_height() + 4
+    # Right column
+    y_right = start_y
+    for attr_name, value in right_attrs:
+        label = f"{attr_name.replace('_', ' ').title()}: "
+        label_surf = body_font.render(label, True, (220, 220, 220))
+        surface.blit(label_surf, (right_x, y_right))
+
+        value_color = get_stat_color(value)
+        value_surf = body_font.render(str(value), True, value_color)
+        surface.blit(value_surf, (right_x + label_surf.get_width(), y_right))
+
+        y_right += line_height
 
 
 def draw_anomalies_page(surface):
