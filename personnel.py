@@ -2,10 +2,13 @@ import random
 import json
 
 class Personnel:
-    with open("names.json", "r") as f:
-        _data = json.load(f)
+    with open("nationalities.json", "r", encoding="utf-8") as f:
+        _nationalities = json.load(f)
 
-    with open("positions.json", "r") as f:
+    with open("names.json", "r", encoding="utf-8") as f:
+        _names = json.load(f)
+
+    with open("positions.json", "r", encoding="utf-8") as f:
         _positions = json.load(f)
 
     _all_attributes = [
@@ -15,10 +18,10 @@ class Personnel:
         "marksmanship", "situational_awareness", "physical_fitness",
         # research attributes
         "data_collection", "anomaly_knowledge", "analytical_thinking",
-        # medical attributes
-        "surgery", "psychology", "first_aid",
         # mental attributes
         "adaptability", "determination", "negotiation",
+        # medical attributes
+        "surgery", "psychology", "first_aid",
     ]
 
     @staticmethod
@@ -32,21 +35,26 @@ class Personnel:
     def __init__(self):
         # personnel identity
         self.gender = random.choice(["male", "female"])
-        self.fname = random.choice(self._data["first_names"][self.gender])
-        self.lname = random.choice(self._data["last_names"])
+        # personnel nationality
+        self.nationality = random.choice(list(self._nationalities.keys()))
+        # pick a first language from a list of languages from that nationality
+        self.first_language = random.choice(self._nationalities[self.nationality]["languages"])
+        # generate first and last names based on the personnels first language
+        self.fname = random.choice(self._names["first_names"][self.first_language][self.gender])
+        self.lname = random.choice(self._names["last_names"][self.first_language])
 
-        # personnel position
+        # personnel attributes and position
         self.position = random.choice(list(self._positions.keys()))
         # get the primary and secondary attributes for this position
         primary_attrs = set(self._positions[self.position].get("primary", []))
         secondary_attrs = set(self._positions[self.position].get("secondary", []))
         # attribute means (tweak these to change “role weight”)
         # primary stats tend to be higher
-        PRIMARY_MU = 12
-        # secondary stats are slightly above average
-        SECONDARY_MU = 10 
+        PRIMARY_MU = 12 
+        # secondary stats are slightly above average  
+        SECONDARY_MU = 10
         # everything else is baseline
-        OTHER_MU = 8     
+        OTHER_MU = 8      
 
         self.attributes = {}
 
@@ -57,8 +65,10 @@ class Personnel:
                 mu = SECONDARY_MU
             else:
                 mu = OTHER_MU
-
             self.attributes[attr] = self._generate_attribute(mu=mu)
 
     def __repr__(self):
-        return f"{self.fname} {self.lname} ({self.gender}, {self.position})"
+        return (
+            f"{self.fname} {self.lname} "
+            f"({self.gender}, {self.nationality}, {self.first_language}, {self.position})"
+        )

@@ -1,7 +1,81 @@
 {
   "first_names": {
-    "male": ["Toby", "Ethan", "Noah", "Liam"],
-    "female": ["Maya", "Amelia", "Zoe", "Nora"]
+    "english": {
+      "male": ["James", "Michael", "William", "David", "Robert"],
+      "female": ["Emma", "Olivia", "Sophia", "Ava", "Emily"]
+    },
+    "french": {
+      "male": ["Jean", "Pierre", "Louis", "Marc", "Antoine"],
+      "female": ["Marie", "Claire", "Sophie", "Camille", "Elise"]
+    },
+    "german": {
+      "male": ["Hans", "Lukas", "Jonas", "Karl", "Matthias"],
+      "female": ["Anna", "Lena", "Sophia", "Mia", "Greta"]
+    },
+    "spanish": {
+      "male": ["Carlos", "Juan", "Miguel", "Pedro", "Diego"],
+      "female": ["Lucia", "Maria", "Carmen", "Isabel", "Sofia"]
+    },
+    "portuguese": {
+      "male": ["João", "Miguel", "Tiago", "Pedro", "Rui"],
+      "female": ["Ana", "Maria", "Inês", "Beatriz", "Sofia"]
+    },
+    "italian": {
+      "male": ["Luca", "Marco", "Giovanni", "Alessandro", "Matteo"],
+      "female": ["Giulia", "Francesca", "Chiara", "Sara", "Alessia"]
+    },
+    "russian": {
+      "male": ["Ivan", "Dmitri", "Alexei", "Sergei", "Nikolai"],
+      "female": ["Anastasia", "Olga", "Natalia", "Irina", "Tatiana"]
+    },
+    "dutch": {
+      "male": ["Jan", "Daan", "Bram", "Lars", "Thijs"],
+      "female": ["Sanne", "Lisa", "Emma", "Julia", "Anna"]
+    },
+    "swedish": {
+      "male": ["Erik", "Johan", "Lars", "Anders", "Oskar"],
+      "female": ["Sara", "Elin", "Maja", "Anna", "Emma"]
+    },
+    "norwegian": {
+      "male": ["Ola", "Haakon", "Magnus", "Anders", "Jonas"],
+      "female": ["Mari", "Ingrid", "Nora", "Anna", "Emma"]
+    },
+    "finnish": {
+      "male": ["Mikko", "Jussi", "Antti", "Lauri", "Ville"],
+      "female": ["Emma", "Aino", "Sofia", "Laura", "Kaisa"]
+    },
+    "danish": {
+      "male": ["Mikkel", "Lars", "Anders", "Jakob", "Thomas"],
+      "female": ["Marie", "Sofie", "Anna", "Ida", "Camilla"]
+    },
+    "japanese": {
+      "male": ["Haruki", "Takumi", "Daichi", "Yuki", "Satoshi"],
+      "female": ["Yuki", "Aiko", "Hana", "Mai", "Sakura"]
+    },
+    "mandarin": {
+      "male": ["Wei", "Liang", "Jun", "Ming", "Hao"],
+      "female": ["Mei", "Xiao", "Lan", "Hui", "Jing"]
+    },
+    "korean": {
+      "male": ["Min-jun", "Ji-hoon", "Seong-min", "Hyun-woo", "Jae-won"],
+      "female": ["Seo-yeon", "Ji-eun", "Soo-jin", "Hye-jin", "Min-seo"]
+    }
   },
-  "last_names": ["Vance", "Hale", "Mercer", "Quinn"]
+  "last_names": {
+    "english": ["Smith", "Johnson", "Brown", "Taylor", "Wilson"],
+    "french": ["Dubois", "Lefevre", "Moreau", "Laurent", "Mercier"],
+    "german": ["Müller", "Schmidt", "Schneider", "Fischer", "Weber"],
+    "spanish": ["García", "Martínez", "López", "Sánchez", "González"],
+    "portuguese": ["Silva", "Ferreira", "Pereira", "Oliveira", "Santos"],
+    "italian": ["Rossi", "Russo", "Ferrari", "Esposito", "Bianchi"],
+    "russian": ["Ivanov", "Petrov", "Sidorov", "Smirnov", "Volkov"],
+    "dutch": ["De Jong", "Jansen", "De Vries", "Bakker", "Visser"],
+    "swedish": ["Johansson", "Andersson", "Karlsson", "Nilsson", "Eriksson"],
+    "norwegian": ["Hansen", "Johansen", "Olsen", "Larsen", "Andersen"],
+    "finnish": ["Korhonen", "Virtanen", "Mäkinen", "Nieminen", "Järvinen"],
+    "danish": ["Jensen", "Nielsen", "Hansen", "Pedersen", "Andersen"],
+    "japanese": ["Sato", "Suzuki", "Takahashi", "Tanaka", "Watanabe"],
+    "mandarin": ["Wang", "Li", "Zhang", "Liu", "Chen"],
+    "korean": ["Kim", "Lee", "Park", "Choi", "Jung"]
+  }
 }
