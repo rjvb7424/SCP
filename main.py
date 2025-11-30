@@ -232,13 +232,25 @@ class Game:
                 break
 
     def handle_operations_click(self, mx, my):
-        # If we are in the cinematic execution view, any click after finish returns.
+        # 1) Cinematic execution view handling
         if self.active_operation_run is not None:
-            if self.active_operation_run.finished:
-                self.active_operation_run = None
-            # Ignore normal map/assign clicks while the mission is running
-            return
+            # If the run isn't finished yet, ignore clicks (just watch the log)
+            if not self.active_operation_run.finished:
+                return
 
+            # If it *is* finished, close the cinematic view
+            # but DO NOT return yet – let this same click be used to select a mission / press buttons
+            self.active_operation_run = None
+
+        # 2) Normal operations UI – first: select operation from map markers
+        for idx, rect in self.operation_marker_rects:
+            if rect.collidepoint(mx, my):
+                self.operations_manager.select(idx)
+                self.operation_mode = "view"
+                self.selected_team_indices.clear()
+                return
+
+        # 3) Info-panel interactions
         if self.operation_mode == "view":
             if self.op_execute_rect and self.op_execute_rect.collidepoint(mx, my):
                 op = self.operations_manager.current
@@ -252,6 +264,7 @@ class Game:
                         self.selected_team_indices.clear()
 
         elif self.operation_mode == "assign":
+            # Select/deselect staff rows
             for s_idx, rect in self.op_staff_item_rects:
                 if rect.collidepoint(mx, my):
                     person = self.staff_roster.members[s_idx]
@@ -262,10 +275,12 @@ class Game:
                             self.selected_team_indices.add(s_idx)
                     return
 
+            # Cancel button
             if self.op_cancel_rect and self.op_cancel_rect.collidepoint(mx, my):
                 self.operation_mode = "view"
                 self.selected_team_indices.clear()
 
+            # Confirm / Launch button
             elif self.op_confirm_rect and self.op_confirm_rect.collidepoint(mx, my):
                 if self.selected_team_indices:
                     team = []
