@@ -1,7 +1,5 @@
-# operations_page.py
 import pygame
-from operations import Operations
-
+from operations import Operations, OperationRun
 
 def project_lat_lon_on_image(lat, lon, img_x, img_y, img_w, img_h):
     """
@@ -328,3 +326,142 @@ def draw_operations_page(
     surface.blit(txt, txt.get_rect(center=execute_button_rect.center))
 
     return marker_hitboxes, execute_button_rect, cancel_button_rect, confirm_button_rect, staff_item_rects
+
+def draw_operation_execution_page(
+    surface,
+    op_run: OperationRun,
+    title_font,
+    body_font,
+    width,
+    height,
+    menu_height,
+):
+    """
+    Left: scrolling mission log (like Fallout Shelter exploring).
+    Right: team status (names + status, color coded).
+    """
+    margin = 20
+    top = menu_height + 20
+
+    right_panel_width = max(320, int(width * 0.28))
+
+    # Left log area and right team panel
+    log_rect = pygame.Rect(
+        margin,
+        top,
+        width - 3 * margin - right_panel_width,
+        height - top - margin,
+    )
+    team_rect = pygame.Rect(
+        log_rect.right + margin,
+        top,
+        right_panel_width,
+        height - top - margin,
+    )
+
+    # Backgrounds / borders
+    pygame.draw.rect(surface, (15, 15, 15), log_rect)
+    pygame.draw.rect(surface, (35, 35, 35), team_rect)
+    pygame.draw.rect(surface, (90, 90, 90), log_rect, width=1)
+    pygame.draw.rect(surface, (90, 90, 90), team_rect, width=1)
+
+    # --- Header / title ---
+    op = op_run.operation
+    title_surf = title_font.render(op.codename, True, (255, 255, 255))
+    subtitle = f"{op.city}, {op.country} – {op.anomaly_name} ({op.anomaly_class})"
+    subtitle_surf = body_font.render(subtitle, True, (200, 200, 200))
+
+    surface.blit(title_surf, (log_rect.x + 10, log_rect.y + 8))
+    surface.blit(subtitle_surf, (log_rect.x + 10, log_rect.y + 10 + title_surf.get_height()))
+
+    # --- Mission log (scrolling) ---
+    log_inner_margin = 12
+    log_inner_rect = pygame.Rect(
+        log_rect.x + log_inner_margin,
+        log_rect.y + log_inner_margin + title_surf.get_height() + subtitle_surf.get_height(),
+        log_rect.width - 2 * log_inner_margin,
+        log_rect.height - 3 * log_inner_margin - title_surf.get_height() - subtitle_surf.get_height(),
+    )
+
+    pygame.draw.rect(surface, (10, 10, 10), log_inner_rect)
+    pygame.draw.rect(surface, (60, 60, 60), log_inner_rect, width=1)
+
+    line_height = body_font.get_height() + 4
+    max_lines = max(1, log_inner_rect.height // line_height)
+
+    events = op_run.visible_log
+    start_index = max(0, len(events) - max_lines)
+
+    y = log_inner_rect.y + 6
+
+    for ev in events[start_index:]:
+        # Time column
+        time_surf = body_font.render(ev.time_label, True, (140, 160, 200))
+        surface.blit(time_surf, (log_inner_rect.x + 8, y))
+
+        # Text column
+        text_x = log_inner_rect.x + 90
+        text_surf = body_font.render(ev.text, True, ev.color)
+        surface.blit(text_surf, (text_x, y))
+
+        y += line_height
+
+    # If mission finished, show a small hint at the bottom
+    if op_run.finished:
+        msg = "Operation complete – press SPACE or click to return."
+        msg_surf = body_font.render(msg, True, (230, 230, 230))
+        surface.blit(
+            msg_surf,
+            msg_surf.get_rect(
+                midbottom=(log_rect.centerx, log_rect.bottom - 8)
+            ),
+        )
+
+    # --- Team panel on the right ---
+    pad = 14
+    text_x = team_rect.x + pad
+    y = team_rect.y + pad
+
+    header = title_font.render("Strike Team", True, (255, 255, 255))
+    surface.blit(header, (text_x, y))
+    y += header.get_height() + 6
+
+    for member in op_run.team:
+        status = getattr(member, "status", "Active")
+
+        if status == "KIA":
+            bg = (80, 25, 25)
+            text_col = (255, 200, 200)
+        elif status == "Injured":
+            bg = (90, 70, 30)
+            text_col = (255, 230, 190)
+        else:
+            bg = (35, 70, 40)
+            text_col = (220, 255, 220)
+
+        row_rect = pygame.Rect(
+            team_rect.x + pad,
+            y,
+            team_rect.width - 2 * pad,
+            32,
+        )
+
+        pygame.draw.rect(surface, bg, row_rect, border_radius=4)
+        pygame.draw.rect(surface, (90, 90, 90), row_rect, width=1, border_radius=4)
+
+        label = f"{member.fname} {member.lname} – {member.position} ({status})"
+        label_surf = body_font.render(label, True, text_col)
+        surface.blit(label_surf, (row_rect.x + 6, row_rect.y + 6))
+
+        y += row_rect.height + 4
+
+    # Outcome summary at bottom of team panel
+    y += 6
+    result = op_run.sim_result
+    outcome_text = "Outcome: SUCCESS" if result["success"] else "Outcome: FAILURE"
+    outcome_col = (140, 220, 140) if result["success"] else (230, 110, 110)
+    outcome_surf = body_font.render(outcome_text, True, outcome_col)
+    surface.blit(
+        outcome_surf,
+        (text_x, min(y, team_rect.bottom - outcome_surf.get_height() - pad)),
+    )

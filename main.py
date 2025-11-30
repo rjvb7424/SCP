@@ -3,16 +3,23 @@ import sys
 
 from staff import Staff
 from personnel_profile import draw_personnel_page
-from operations import Operations
-from operations_page import draw_operations_page
 from tasks import TaskManager
 from calendar_page import draw_calendar_page
 from ui_common import draw_menu, draw_anomalies_page
 from facility import Facility, BuildOrder
 from facility_page import draw_facility_page
 
+from operations import Operations, OperationRun
+from operations_page import draw_operations_page, draw_operation_execution_page
+
+
 
 class Game:
+    def update(self, dt: float):
+        # Only thing we need to update for now is an active operation run
+        if self.current_page == "operations" and self.active_operation_run is not None:
+            self.active_operation_run.update(dt)
+
     def __init__(self):
         pygame.init()
 
@@ -45,6 +52,10 @@ class Game:
         self.operation_flag_images = [
             self.load_flag_image(op.flag_path) for op in self.operations_manager.operations
         ]
+
+        # Operation runtime (cinematic execution)
+        self.active_operation_run: OperationRun | None = None
+
 
         try:
             self.world_map_image = pygame.image.load("world_map.jpg").convert()
@@ -123,7 +134,7 @@ class Game:
     def run(self):
         running = True
         while running:
-            self.clock.tick(self.FPS)
+            dt = self.clock.tick(self.FPS) / 1000.0  # seconds since last frame
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -131,6 +142,7 @@ class Game:
                 else:
                     self.handle_event(event)
 
+            self.update(dt)
             self.draw()
 
         pygame.quit()
@@ -152,6 +164,14 @@ class Game:
     def handle_keydown(self, event):
         if event.key == pygame.K_ESCAPE:
             pygame.event.post(pygame.event.Event(pygame.QUIT))
+            return
+
+        # If we are in the cinematic operation view, SPACE/ENTER exits when finished.
+        if self.current_page == "operations" and self.active_operation_run is not None:
+            if event.key in (pygame.K_SPACE, pygame.K_RETURN):
+                if self.active_operation_run.finished:
+                    self.active_operation_run = None
+            # Don't do left/right switching etc while cinematic is active
             return
 
         if event.key == pygame.K_RIGHT:
@@ -182,6 +202,7 @@ class Game:
                 if self.current_page != "operations":
                     self.operation_mode = "view"
                     self.selected_team_indices.clear()
+                    self.active_operation_run = None
                 if self.current_page != "calendar":
                     self.calendar_selected_staff_index = None
                 if self.current_page != "facility":
@@ -211,13 +232,12 @@ class Game:
                 break
 
     def handle_operations_click(self, mx, my):
-        # Select operation from map
-        for idx, rect in self.operation_marker_rects:
-            if rect.collidepoint(mx, my):
-                self.operations_manager.select(idx)
-                self.operation_mode = "view"
-                self.selected_team_indices.clear()
-                return
+        # If we are in the cinematic execution view, any click after finish returns.
+        if self.active_operation_run is not None:
+            if self.active_operation_run.finished:
+                self.active_operation_run = None
+            # Ignore normal map/assign clicks while the mission is running
+            return
 
         if self.operation_mode == "view":
             if self.op_execute_rect and self.op_execute_rect.collidepoint(mx, my):
@@ -257,7 +277,9 @@ class Game:
                     if team:
                         op = self.operations_manager.current
                         if op:
-                            op.simulate(team)
+                            # Start the cinematic run instead of instant simulate()
+                            self.active_operation_run = OperationRun(op, team)
+
                 self.operation_mode = "view"
                 self.selected_team_indices.clear()
 
@@ -446,6 +468,26 @@ class Game:
         )
 
     def draw_operations_page(self):
+        # If an operation is currently running, show the cinematic log view
+        if self.active_operation_run is not None:
+            draw_operation_execution_page(
+                self.screen,
+                self.active_operation_run,
+                self.title_font,
+                self.body_font,
+                self.WIDTH,
+                self.HEIGHT,
+                self.MENU_HEIGHT,
+            )
+            # Clear rects so hidden buttons/markers aren't accidentally clickable
+            self.operation_marker_rects = []
+            self.op_execute_rect = None
+            self.op_cancel_rect = None
+            self.op_confirm_rect = None
+            self.op_staff_item_rects = []
+            return
+
+        # Normal operations map / assign UI
         (
             self.operation_marker_rects,
             self.op_execute_rect,
@@ -466,6 +508,8 @@ class Game:
             self.HEIGHT,
             self.MENU_HEIGHT,
         )
+
+
 
     def draw_calendar_page(self):
         (
