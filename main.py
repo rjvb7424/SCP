@@ -7,8 +7,8 @@ from operations import Operations
 from operations_page import draw_operations_page
 from tasks import TaskManager
 from calendar_page import draw_calendar_page
-from ui_common import draw_text, draw_menu, draw_anomalies_page
-from facility import Facility
+from ui_common import draw_menu, draw_anomalies_page
+from facility import Facility, BuildOrder
 from facility_page import draw_facility_page
 
 
@@ -27,7 +27,7 @@ class Game:
 
         self.clock = pygame.time.Clock()
 
-        # In-game day counter (FM-style)
+        # In-game day counter
         self.current_day = 0
 
         # --- Staff setup ---
@@ -57,13 +57,14 @@ class Game:
 
         # --- Facility (Fallout Shelter-style base) ---
         self.facility = Facility()
+        self.facility_build_orders: list[BuildOrder] = []
 
         # Fonts
         self.title_font = pygame.font.Font(None, 32)
         self.body_font = pygame.font.Font(None, 26)
         self.menu_font = pygame.font.Font(None, 24)
 
-        # Menu tabs (added Facility as new tab)
+        # Menu tabs
         self.menu_items = [
             {"name": "Personnel File", "page": "personnel", "rect": pygame.Rect(20, 5, 150, 30)},
             {"name": "Anomalies",      "page": "anomalies", "rect": pygame.Rect(190, 5, 150, 30)},
@@ -84,6 +85,8 @@ class Game:
         # Facility UI state
         self.facility_mode = "view"  # "view" or "build"
         self.facility_selected_room_type = None
+        self.facility_selected_cell = None
+        self.facility_selected_builder_index = None
 
         # Clickable zones / cached rects
         self.staff_menu_rects = []
@@ -92,11 +95,14 @@ class Game:
         self.op_cancel_rect = None
         self.op_confirm_rect = None
         self.op_staff_item_rects = []
+
         self.cal_staff_rows = []
         self.cal_task_buttons = []
         self.cal_continue_rect = None
+
         self.facility_cell_rects = []
         self.facility_roomtype_buttons = []
+        self.facility_builder_buttons = []
         self.facility_cancel_build_rect = None
 
     # ---------- Init helpers ----------
@@ -145,7 +151,6 @@ class Game:
 
     def handle_keydown(self, event):
         if event.key == pygame.K_ESCAPE:
-            # ESC: post a QUIT so the main loop exits
             pygame.event.post(pygame.event.Event(pygame.QUIT))
             return
 
@@ -182,8 +187,10 @@ class Game:
                 if self.current_page != "facility":
                     self.facility_mode = "view"
                     self.facility_selected_room_type = None
+                    self.facility_selected_builder_index = None
+                    self.facility_selected_cell = None
 
-                return  # don't also click into page content in the same frame
+                return
 
         # Route to page-specific handlers
         if self.current_page == "personnel":
@@ -213,7 +220,6 @@ class Game:
                 return
 
         if self.operation_mode == "view":
-            # Switch to team assignment
             if self.op_execute_rect and self.op_execute_rect.collidepoint(mx, my):
                 op = self.operations_manager.current
                 if op and op.status == "Available":
@@ -226,7 +232,6 @@ class Game:
                         self.selected_team_indices.clear()
 
         elif self.operation_mode == "assign":
-            # Toggle team members
             for s_idx, rect in self.op_staff_item_rects:
                 if rect.collidepoint(mx, my):
                     person = self.staff_roster.members[s_idx]
@@ -237,12 +242,10 @@ class Game:
                             self.selected_team_indices.add(s_idx)
                     return
 
-            # Cancel assignment
             if self.op_cancel_rect and self.op_cancel_rect.collidepoint(mx, my):
                 self.operation_mode = "view"
                 self.selected_team_indices.clear()
 
-            # Confirm and run simulation
             elif self.op_confirm_rect and self.op_confirm_rect.collidepoint(mx, my):
                 if self.selected_team_indices:
                     team = []
@@ -259,13 +262,11 @@ class Game:
                 self.selected_team_indices.clear()
 
     def handle_calendar_click(self, mx, my):
-        # Select staff member on the left list
         for s_idx, rect in self.cal_staff_rows:
             if rect.collidepoint(mx, my):
                 self.calendar_selected_staff_index = s_idx
                 return
 
-        # Click role-specific task buttons
         if (
             self.calendar_selected_staff_index is not None
             and 0 <= self.calendar_selected_staff_index < len(self.staff_roster.members)
@@ -283,38 +284,117 @@ class Game:
                         )
                     return
 
-        # "Continue" button to advance to next event / day
         if self.cal_continue_rect and self.cal_continue_rect.collidepoint(mx, my):
             self.current_day, finished_tasks = self.task_manager.advance_to_next_event(
                 self.current_day
             )
-            # later: show finished_tasks somewhere
+            self.process_finished_tasks(finished_tasks)
 
     def handle_facility_click(self, mx, my):
-        # Select room type to build
+        # Builder selection
+        for idx, rect in self.facility_builder_buttons:
+            if rect.collidepoint(mx, my):
+                person = self.staff_roster.members[idx]
+                if getattr(person, "status", "Active") == "Active":
+                    self.facility_selected_builder_index = idx
+                return
+
+        # Room type selection
         for room_type, rect in self.facility_roomtype_buttons:
             if rect.collidepoint(mx, my):
                 self.facility_mode = "build"
                 self.facility_selected_room_type = room_type
                 return
 
-        # Cancel build
-        if self.facility_mode == "build" and self.facility_cancel_build_rect:
-            if self.facility_cancel_build_rect.collidepoint(mx, my):
-                self.facility_mode = "view"
-                self.facility_selected_room_type = None
-                return
+        # Cancel build mode
+        if (
+            self.facility_mode == "build"
+            and self.facility_cancel_build_rect
+            and self.facility_cancel_build_rect.collidepoint(mx, my)
+        ):
+            self.facility_mode = "view"
+            self.facility_selected_room_type = None
+            return
 
-        # Click on grid cell (for building)
-        if self.facility_mode == "build" and self.facility_selected_room_type:
-            for row, col, rect in self.facility_cell_rects:
-                if rect.collidepoint(mx, my):
-                    built = self.facility.build_room(row, col, self.facility_selected_room_type)
-                    # keep build mode so you can place multiple rooms of same type
+        # Click on a grid cell
+        clicked = None
+        for row, col, rect in self.facility_cell_rects:
+            if rect.collidepoint(mx, my):
+                clicked = (row, col)
+                break
+
+        if clicked is None:
+            return
+
+        row, col = clicked
+        self.facility_selected_cell = clicked
+
+        # If not in build mode, just viewing
+        if self.facility_mode != "build":
+            return
+
+        # Build mode: need room type + builder
+        if (
+            self.facility_selected_room_type is None
+            or self.facility_selected_builder_index is None
+        ):
+            return
+
+        if self.facility.get_room(row, col) is not None:
+            return  # occupied, can't build here
+
+        if any(bo.row == row and bo.col == col for bo in self.facility_build_orders):
+            return  # already under construction
+
+        builder = self.staff_roster.members[self.facility_selected_builder_index]
+        if getattr(builder, "status", "Active") != "Active":
+            return
+        if getattr(builder, "current_task", None) is not None:
+            return  # already busy
+
+        # Construction duration per room type
+        build_durations = {
+            "Command Center": 4,
+            "Research Lab": 3,
+            "Infirmary": 3,
+            "Security Station": 3,
+            "Dormitory": 2,
+            "Common Room": 2,
+        }
+        duration = build_durations.get(self.facility_selected_room_type, 2)
+
+        task = self.task_manager.create_task(
+            name=f"Build {self.facility_selected_room_type}",
+            assignee=builder,
+            start_day=self.current_day,
+            duration_days=duration,
+            description=f"Construction of {self.facility_selected_room_type} at row {row+1}, col {col+1}.",
+        )
+
+        order = BuildOrder(
+            row=row,
+            col=col,
+            room_type=self.facility_selected_room_type,
+            task=task,
+            builder=builder,
+        )
+        self.facility_build_orders.append(order)
+
+    # ---------- Finished tasks hook (calendar) ----------
+
+    def process_finished_tasks(self, finished_tasks):
+        """
+        Handle any special outcomes when tasks complete
+        (e.g., finishing facility construction).
+        """
+        for t in finished_tasks:
+            # Check for completed construction
+            for order in list(self.facility_build_orders):
+                if order.task is t:
+                    built = self.facility.build_room(order.row, order.col, order.room_type)
                     if not built:
-                        # optionally later: show message
-                        pass
-                    return
+                        print(f"Failed to place room {order.room_type} at {order.row},{order.col}")
+                    self.facility_build_orders.remove(order)
 
     # ---------- Drawing ----------
 
@@ -409,11 +489,13 @@ class Game:
         (
             self.facility_cell_rects,
             self.facility_roomtype_buttons,
+            self.facility_builder_buttons,
             self.facility_cancel_build_rect,
         ) = draw_facility_page(
             self.screen,
             self.facility,
             self.staff_roster,
+            self.facility_build_orders,
             self.current_day,
             self.title_font,
             self.body_font,
@@ -422,6 +504,8 @@ class Game:
             self.MENU_HEIGHT,
             self.facility_mode,
             self.facility_selected_room_type,
+            self.facility_selected_cell,
+            self.facility_selected_builder_index,
         )
 
 

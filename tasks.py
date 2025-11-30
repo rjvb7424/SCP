@@ -11,11 +11,19 @@ def day_to_date(day_index: int) -> datetime.date:
 
 class Task:
     """
-    A generic timed task assigned to one member of staff.
-    Times are in 'day indices' (integers) managed by the game.
+    Generic timed task assigned to one member of staff.
     """
 
-    def __init__(self, name, assignee, start_day, duration_days, description=""):
+    def __init__(
+        self,
+        name,
+        assignee,
+        start_day,
+        duration_days,
+        description="",
+        task_type="generic",
+        payload=None,
+    ):
         self.name = name
         self.assignee = assignee
         self.start_day = start_day
@@ -23,6 +31,10 @@ class Task:
         self.end_day = start_day + duration_days
         self.description = description
         self.status = "Active"  # Active / Completed
+
+        # Extra info so we can react differently to different tasks
+        self.task_type = task_type   # e.g. "generic", "facility_build"
+        self.payload = payload or {} # free-form dict
 
     def remaining_days(self, current_day: int) -> int:
         return max(0, self.end_day - current_day)
@@ -34,8 +46,25 @@ class TaskManager:
 
     # ---- creation / querying ----
 
-    def create_task(self, name, assignee, start_day, duration_days, description=""):
-        task = Task(name, assignee, start_day, duration_days, description)
+    def create_task(
+        self,
+        name,
+        assignee,
+        start_day,
+        duration_days,
+        description="",
+        task_type="generic",
+        payload=None,
+    ):
+        task = Task(
+            name,
+            assignee,
+            start_day,
+            duration_days,
+            description=description,
+            task_type=task_type,
+            payload=payload,
+        )
         self.tasks.append(task)
 
         # mark personnel as busy
@@ -59,15 +88,13 @@ class TaskManager:
         """
         Advance time to the next 'event day'.
 
-        If there are active tasks, we jump to the earliest completion day
-        (like FM jumping to next match / training event).
+        If there are active tasks, we jump to the earliest completion day.
         If there are no tasks, we just go forward one day.
 
         Returns: (new_day, finished_tasks_list)
         """
         active = self.active_tasks(current_day)
         if not active:
-            # nothing scheduled – just go one day forward
             return current_day + 1, []
 
         next_end = min(t.end_day for t in active)
@@ -87,7 +114,7 @@ class TaskManager:
         return new_day, finished
 
 
-# ---- Role-specific tasks (like FM training categories) ----
+# ---- Role classification & role-specific tasks ----
 
 def _classify_position(position: str) -> str:
     """Roughly map concrete positions to a role."""
