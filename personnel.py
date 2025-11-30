@@ -40,7 +40,6 @@ class Personnel:
 
         # personnel nationality
         self.nationality = random.choice(list(self._nationalities.keys()))
-        # pick a first language from the nationality's language list
         self.first_language = random.choice(
             self._nationalities[self.nationality]["languages"]
         )
@@ -62,17 +61,14 @@ class Personnel:
         else:
             self.position = random.choice(list(self._positions.keys()))
 
-        # get the primary and secondary attributes for this position
         primary_attrs = set(self._positions[self.position].get("primary", []))
         secondary_attrs = set(self._positions[self.position].get("secondary", []))
 
-        # attribute means (tweak these to change “role weight”)
-        PRIMARY_MU = 12   # primary stats tend to be higher
-        SECONDARY_MU = 10 # secondary stats are slightly above average
-        OTHER_MU = 8      # everything else is baseline
+        PRIMARY_MU = 12
+        SECONDARY_MU = 10
+        OTHER_MU = 8
 
         self.attributes = {}
-
         for attr in self._all_attributes:
             if attr in primary_attrs:
                 mu = PRIMARY_MU
@@ -83,11 +79,15 @@ class Personnel:
             self.attributes[attr] = self._generate_attribute(mu=mu)
 
         # --- Mission / health state ---
-        # "Active" staff can be sent on operations.
-        # "Injured" or "KIA" staff are not selectable.
         self.status = "Active"   # Active / Injured / KIA
         self.alive = True
-        self.on_mission = False  # future use if you add multi-step missions
+        self.on_mission = False
+
+        # --- Task / calendar state ---
+        # current_task: Task object or None
+        self.current_task = None
+        # day index (int) when this person becomes free again
+        self.busy_until_day = 0
 
     def __repr__(self):
         return f"{self.fname} {self.lname}"
