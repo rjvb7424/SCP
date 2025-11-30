@@ -40,7 +40,6 @@ def _build_occupant_map(
     rows = facility.rows
     cols = facility.cols
 
-    # Rooms by type for distributing staff
     rooms_by_type: Dict[str, List[tuple]] = {}
     for r in range(rows):
         for c in range(cols):
@@ -50,13 +49,13 @@ def _build_occupant_map(
 
     existing_room_types = set(rooms_by_type.keys())
 
-    # Which cell is each builder working in?
+    # Builders show in the room they are constructing
     builder_cells = {}
     for order in build_orders:
         if order.task.status == "Active":
             builder_cells[order.builder] = (order.row, order.col)
 
-    # Where do idle staff chill?
+    # Where idle staff goes to chill
     idle_room_type = None
     for candidate in ("Common Room", "Dormitory", "Command Center"):
         if candidate in existing_room_types:
@@ -64,7 +63,7 @@ def _build_occupant_map(
             break
 
     occupants_by_cell: Dict[tuple, list] = {}
-    type_assign_counter: Dict[str, int] = {}
+    assign_counter: Dict[str, int] = {}
 
     def assign_to_cell(cell_key, person):
         occupants_by_cell.setdefault(cell_key, []).append(person)
@@ -74,32 +73,31 @@ def _build_occupant_map(
         if status != "Active":
             continue
 
-        # If they're building a room, show them in that construction cell
+        # Builders
         if person in builder_cells:
-            cell = builder_cells[person]
-            assign_to_cell(cell, person)
+            assign_to_cell(builder_cells[person], person)
             continue
 
         task = getattr(person, "current_task", None)
 
-        # If they're on a task, send them to a role-specific room
+        # On a task -> role room
         if task is not None and task.status == "Active":
             role = _classify_position(getattr(person, "position", ""))
             room_type = ROLE_ROOM_MAP.get(role)
             if room_type and room_type in rooms_by_type:
-                index = type_assign_counter.get(room_type, 0)
+                idx = assign_counter.get(room_type, 0)
                 room_list = rooms_by_type[room_type]
-                cell = room_list[index % len(room_list)][:2]
-                type_assign_counter[room_type] = index + 1
+                cell = room_list[idx % len(room_list)][:2]
+                assign_counter[room_type] = idx + 1
                 assign_to_cell(cell, person)
                 continue
 
-        # Otherwise they are idle; send to chill room
+        # Idle -> chill room
         if idle_room_type and idle_room_type in rooms_by_type:
-            index = type_assign_counter.get(idle_room_type, 0)
+            idx = assign_counter.get(idle_room_type, 0)
             room_list = rooms_by_type[idle_room_type]
-            cell = room_list[index % len(room_list)][:2]
-            type_assign_counter[idle_room_type] = index + 1
+            cell = room_list[idx % len(room_list)][:2]
+            assign_counter[idle_room_type] = idx + 1
             assign_to_cell(cell, person)
 
     return occupants_by_cell
@@ -134,7 +132,7 @@ def draw_facility_page(
     top = menu_height + 20
     card_width = width - margin * 2
 
-    # Title + mode
+    # --- Title + mode ---
     title_text = "Facility"
     title_surf = title_font.render(title_text, True, (255, 255, 255))
     surface.blit(title_surf, (margin, top))
@@ -145,19 +143,24 @@ def draw_facility_page(
     surface.blit(mode_surf, (margin, top))
     top += mode_surf.get_height() + 8
 
-    # Layout: left grid, right control panel
-    grid_width = int(card_width * 0.68)
+    # --- Layout: wider grid, narrower side panel ---
+    # Side panel at least 260px wide, ~25% of card width
+    side_width = max(int(card_width * 0.25), 260)
+    grid_width = card_width - side_width - 10
+
     grid_x = margin
     grid_y = top
     padding = 10
 
-    # --- Horizontal rooms: make each room wider than tall ---
     rows = facility.rows
     cols = facility.cols
 
+    # Horizontal rooms: wider than tall
     inner_w = grid_width - padding * 2
     cell_width = inner_w // cols
-    cell_height = max(40, cell_width // 2)  # ~2:1 aspect ratio (wide rooms)
+    cell_width = max(cell_width, 140)  # keep reasonably wide
+
+    cell_height = max(80, cell_width // 2)  # approx 2:1 width:height
     inner_h = rows * cell_height
     grid_height = inner_h + padding * 2
 
@@ -166,7 +169,7 @@ def draw_facility_page(
     side_rect = pygame.Rect(
         grid_rect.right + 10,
         grid_y,
-        card_width - grid_rect.width - 10,
+        side_width,
         grid_height,
     )
 
@@ -176,15 +179,11 @@ def draw_facility_page(
     pygame.draw.rect(surface, (40, 40, 40), side_rect, border_radius=8)
     pygame.draw.rect(surface, (90, 90, 90), side_rect, width=1, border_radius=8)
 
-    # Where is everyone?
+    # Occupant and build-order maps
     occupants_by_cell = _build_occupant_map(facility, staff_roster, build_orders, current_day)
+    build_orders_by_cell = {(o.row, o.col): o for o in build_orders}
 
-    # Build orders by cell, for quick lookup
-    build_orders_by_cell = {
-        (order.row, order.col): order for order in build_orders
-    }
-
-    # --- Grid drawing ---
+    # --- Draw grid cells ---
     cell_rects: List[Tuple[int, int, pygame.Rect]] = []
 
     for r in range(rows):
@@ -197,8 +196,9 @@ def draw_facility_page(
             order = build_orders_by_cell.get((r, c))
             occupants = occupants_by_cell.get((r, c), [])
 
-            # Highlight selected cell
             is_selected = selected_cell == (r, c)
+
+            header_end_y = None  # bottom of the header area inside this cell
 
             if order is not None:
                 # Under construction
@@ -209,60 +209,86 @@ def draw_facility_page(
 
                 title = f"Building: {order.room_type}"
                 title_surf = body_font.render(title, True, (250, 250, 210))
-                surface.blit(title_surf, (rect.x + 4, rect.y + 4))
+                surface.blit(title_surf, (rect.x + 6, rect.y + 4))
 
-                remaining = order.task.remaining_days(current_day)
-                rem_text = f"{remaining} day(s) remaining"
+                rem = order.task.remaining_days(current_day)
+                rem_text = f"{rem} day(s) remaining"
                 rem_surf = body_font.render(rem_text, True, (240, 240, 200))
-                surface.blit(rem_surf, (rect.x + 4, rect.y + 4 + title_surf.get_height()))
+                surface.blit(rem_surf, (rect.x + 6, rect.y + 4 + title_surf.get_height()))
+
+                header_end_y = rect.y + 4 + title_surf.get_height() + rem_surf.get_height()
+
+            elif room is None:
+                # Empty tile
+                bg = (35, 35, 35)
+                border = (130, 160, 130) if (mode == "build" and selected_room_type) else (70, 70, 70)
+                if is_selected:
+                    border = (200, 200, 200)
+                pygame.draw.rect(surface, bg, rect, border_radius=4)
+                pygame.draw.rect(surface, border, rect, width=1, border_radius=4)
+
+                label_surf = body_font.render("Empty", True, (130, 130, 130))
+                surface.blit(
+                    label_surf,
+                    label_surf.get_rect(center=(rect.centerx, rect.centery)),
+                )
+
+                # no occupants or header for empty rooms
+                header_end_y = None
+
             else:
-                if room is None:
-                    # Empty tile
-                    bg = (35, 35, 35)
-                    border = (130, 160, 130) if (mode == "build" and selected_room_type) else (70, 70, 70)
-                    if is_selected:
-                        border = (200, 200, 200)
-                    pygame.draw.rect(surface, bg, rect, border_radius=4)
-                    pygame.draw.rect(surface, border, rect, width=1, border_radius=4)
+                # Operational room
+                base_col = ROOM_COLORS.get(room.room_type, (80, 80, 80))
+                pygame.draw.rect(surface, base_col, rect, border_radius=4)
 
-                    label_surf = body_font.render("Empty", True, (130, 130, 130))
-                    surface.blit(
-                        label_surf,
-                        label_surf.get_rect(center=(rect.centerx, rect.centery)),
-                    )
-                else:
-                    base_col = ROOM_COLORS.get(room.room_type, (80, 80, 80))
-                    pygame.draw.rect(surface, base_col, rect, border_radius=4)
+                border_col = (255, 255, 255) if is_selected else (30, 30, 30)
+                pygame.draw.rect(
+                    surface, border_col, rect,
+                    width=2 if is_selected else 1,
+                    border_radius=4,
+                )
 
-                    border_col = (255, 255, 255) if is_selected else (30, 30, 30)
-                    pygame.draw.rect(surface, border_col, rect, width=2 if is_selected else 1, border_radius=4)
+                label_surf = body_font.render(room.room_type, True, (240, 240, 240))
+                surface.blit(label_surf, (rect.x + 6, rect.y + 4))
 
-                    # room name
-                    label_surf = body_font.render(room.room_type, True, (240, 240, 240))
-                    surface.blit(label_surf, (rect.x + 4, rect.y + 4))
+                header_end_y = rect.y + 4 + label_surf.get_height()
 
-            # Occupants list (names)
-            if occupants:
-                y_occ = rect.bottom - 4
-                max_lines = 3
-                for person in occupants[:max_lines][::-1]:
-                    name = f"{person.fname} {person.lname}"
-                    name_surf = body_font.render(name, True, (250, 250, 250))
-                    y_occ -= name_surf.get_height()
-                    surface.blit(name_surf, (rect.x + 6, y_occ))
+            # --- Occupants (names) ---
+            if occupants and header_end_y is not None:
+                top_margin = 4
+                bottom_margin = 4
+                occupant_area_top = header_end_y + top_margin
+                occupant_area_bottom = rect.bottom - bottom_margin
 
-                if len(occupants) > max_lines:
-                    more = f"+{len(occupants) - max_lines} more"
-                    more_surf = body_font.render(more, True, (230, 230, 230))
-                    y_occ -= more_surf.get_height()
-                    surface.blit(more_surf, (rect.x + 6, y_occ))
+                if occupant_area_bottom > occupant_area_top:
+                    line_height = body_font.get_linesize()
+                    available_height = occupant_area_bottom - occupant_area_top
+                    max_lines = max(1, available_height // line_height)
+
+                    visible = occupants[:max_lines]
+                    for i, person in enumerate(visible):
+                        name = f"{person.fname} {person.lname}"
+                        y_line = occupant_area_top + i * line_height
+                        if y_line + line_height > occupant_area_bottom:
+                            break
+                        name_surf = body_font.render(name, True, (250, 250, 250))
+                        surface.blit(name_surf, (rect.x + 8, y_line))
+
+                    # "+N more" if overflow
+                    extra = len(occupants) - len(visible)
+                    if extra > 0 and (occupant_area_top + max_lines * line_height) < occupant_area_bottom:
+                        more_y = occupant_area_top + max_lines * line_height
+                        more_text = f"+{extra} more"
+                        more_surf = body_font.render(more_text, True, (230, 230, 230))
+                        if more_y + more_surf.get_height() <= occupant_area_bottom:
+                            surface.blit(more_surf, (rect.x + 8, more_y))
 
             cell_rects.append((r, c, rect))
 
-    # --- Side panel: room info + build controls + builder selection ---
+    # --- Side panel: room info + build controls + builders ---
 
     # 1) Selected room info
-    info_height = 120
+    info_height = 130
     info_rect = pygame.Rect(
         side_rect.x + 8,
         side_rect.y + 8,
@@ -287,7 +313,7 @@ def draw_facility_page(
         order = build_orders_by_cell.get((r, c))
         occs = occupants_by_cell.get((r, c), [])
 
-        loc_text = f"Location: Row {r+1}, Col {c+1}"
+        loc_text = f"Location: Row {r + 1}, Col {c + 1}"
         loc_surf = body_font.render(loc_text, True, (200, 200, 200))
         surface.blit(loc_surf, (info_rect.x + 6, y_info))
         y_info += loc_surf.get_height() + 2
@@ -370,7 +396,7 @@ def draw_facility_page(
     surface.blit(builder_header, (x_r, y_r))
     y_r += builder_header.get_height() + 4
 
-    builder_list_height = 110
+    builder_list_height = 120
     builder_area_rect = pygame.Rect(
         x_r,
         y_r,
@@ -393,8 +419,8 @@ def draw_facility_page(
             22,
         )
 
-        is_selected = selected_builder_index == idx
-        bg = (85, 95, 125) if is_selected else (55, 55, 55)
+        is_selected_builder = selected_builder_index == idx
+        bg = (85, 95, 125) if is_selected_builder else (55, 55, 55)
         pygame.draw.rect(surface, bg, row_rect, border_radius=3)
         pygame.draw.rect(surface, (90, 90, 90), row_rect, width=1, border_radius=3)
 
@@ -419,7 +445,7 @@ def draw_facility_page(
         builder_button_rects.append((idx, row_rect))
         y_b += row_rect.height + 2
         if y_b > builder_area_rect.bottom - 24:
-            break  # don't overflow
+            break  # avoid overflow
 
     # 4) Cancel build button (only in build mode)
     if mode == "build":
