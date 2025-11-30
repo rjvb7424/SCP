@@ -8,6 +8,8 @@ from operations_page import draw_operations_page
 from tasks import TaskManager
 from calendar_page import draw_calendar_page
 from ui_common import draw_text, draw_menu, draw_anomalies_page
+from facility import Facility
+from facility_page import draw_facility_page
 
 
 class Game:
@@ -53,17 +55,21 @@ class Game:
         # --- Task manager / calendar ---
         self.task_manager = TaskManager()
 
+        # --- Facility (Fallout Shelter-style base) ---
+        self.facility = Facility()
+
         # Fonts
         self.title_font = pygame.font.Font(None, 32)
         self.body_font = pygame.font.Font(None, 26)
         self.menu_font = pygame.font.Font(None, 24)
 
-        # Menu tabs
+        # Menu tabs (added Facility as new tab)
         self.menu_items = [
             {"name": "Personnel File", "page": "personnel", "rect": pygame.Rect(20, 5, 150, 30)},
             {"name": "Anomalies",      "page": "anomalies", "rect": pygame.Rect(190, 5, 150, 30)},
             {"name": "Operations",     "page": "operations", "rect": pygame.Rect(360, 5, 150, 30)},
             {"name": "Calendar",       "page": "calendar",  "rect": pygame.Rect(530, 5, 150, 30)},
+            {"name": "Facility",       "page": "facility",  "rect": pygame.Rect(700, 5, 150, 30)},
         ]
 
         self.current_page = "personnel"
@@ -75,6 +81,10 @@ class Game:
         # Calendar UI state
         self.calendar_selected_staff_index = None
 
+        # Facility UI state
+        self.facility_mode = "view"  # "view" or "build"
+        self.facility_selected_room_type = None
+
         # Clickable zones / cached rects
         self.staff_menu_rects = []
         self.operation_marker_rects = []
@@ -85,6 +95,9 @@ class Game:
         self.cal_staff_rows = []
         self.cal_task_buttons = []
         self.cal_continue_rect = None
+        self.facility_cell_rects = []
+        self.facility_roomtype_buttons = []
+        self.facility_cancel_build_rect = None
 
     # ---------- Init helpers ----------
 
@@ -132,7 +145,7 @@ class Game:
 
     def handle_keydown(self, event):
         if event.key == pygame.K_ESCAPE:
-            # ESC: just post a QUIT so the main loop exits
+            # ESC: post a QUIT so the main loop exits
             pygame.event.post(pygame.event.Event(pygame.QUIT))
             return
 
@@ -166,6 +179,9 @@ class Game:
                     self.selected_team_indices.clear()
                 if self.current_page != "calendar":
                     self.calendar_selected_staff_index = None
+                if self.current_page != "facility":
+                    self.facility_mode = "view"
+                    self.facility_selected_room_type = None
 
                 return  # don't also click into page content in the same frame
 
@@ -176,6 +192,8 @@ class Game:
             self.handle_operations_click(mx, my)
         elif self.current_page == "calendar":
             self.handle_calendar_click(mx, my)
+        elif self.current_page == "facility":
+            self.handle_facility_click(mx, my)
 
     # ---------- Per-page mouse handlers ----------
 
@@ -272,6 +290,32 @@ class Game:
             )
             # later: show finished_tasks somewhere
 
+    def handle_facility_click(self, mx, my):
+        # Select room type to build
+        for room_type, rect in self.facility_roomtype_buttons:
+            if rect.collidepoint(mx, my):
+                self.facility_mode = "build"
+                self.facility_selected_room_type = room_type
+                return
+
+        # Cancel build
+        if self.facility_mode == "build" and self.facility_cancel_build_rect:
+            if self.facility_cancel_build_rect.collidepoint(mx, my):
+                self.facility_mode = "view"
+                self.facility_selected_room_type = None
+                return
+
+        # Click on grid cell (for building)
+        if self.facility_mode == "build" and self.facility_selected_room_type:
+            for row, col, rect in self.facility_cell_rects:
+                if rect.collidepoint(mx, my):
+                    built = self.facility.build_room(row, col, self.facility_selected_room_type)
+                    # keep build mode so you can place multiple rooms of same type
+                    if not built:
+                        # optionally later: show message
+                        pass
+                    return
+
     # ---------- Drawing ----------
 
     def draw(self):
@@ -293,6 +337,8 @@ class Game:
             self.draw_operations_page()
         elif self.current_page == "calendar":
             self.draw_calendar_page()
+        elif self.current_page == "facility":
+            self.draw_facility_page()
 
         pygame.display.flip()
 
@@ -357,6 +403,25 @@ class Game:
             self.WIDTH,
             self.HEIGHT,
             self.MENU_HEIGHT,
+        )
+
+    def draw_facility_page(self):
+        (
+            self.facility_cell_rects,
+            self.facility_roomtype_buttons,
+            self.facility_cancel_build_rect,
+        ) = draw_facility_page(
+            self.screen,
+            self.facility,
+            self.staff_roster,
+            self.current_day,
+            self.title_font,
+            self.body_font,
+            self.WIDTH,
+            self.HEIGHT,
+            self.MENU_HEIGHT,
+            self.facility_mode,
+            self.facility_selected_room_type,
         )
 
 
