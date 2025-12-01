@@ -24,21 +24,23 @@ class Personnel:
         "adaptability", "determination", "negotiation",
         # medical attributes
         "surgery", "psychology", "first_aid",
+        # personal / personality attributes
+        "discipline", "loyalty", "stress_resilience",
     ]
 
     @staticmethod
     def _generate_attribute(mu, sigma=3, lo=0, hi=20):
-        """Return an int drawn from a normal distribution."""
+        """Return an int drawn from a normal distribution, clamped to [lo, hi]."""
         value = random.gauss(mu, sigma)
         value = round(value)
         value = max(lo, min(hi, value))
         return int(value)
 
     def __init__(self, position=None):
-        # personnel identity
+        # --- Identity ---
         self.gender = random.choice(["male", "female"])
 
-        # personnel nationality
+        # nationality + language
         self.nationality = random.choice(list(self._nationalities.keys()))
         self.first_language = random.choice(
             self._nationalities[self.nationality]["languages"]
@@ -55,7 +57,31 @@ class Personnel:
         country_for_file = country.replace(" ", "_")
         self.flag_path = f"flags/Flag_of_{country_for_file}.png"
 
-        # personnel position and attributes
+        # --- Demographic / physical info (FM-style profile numbers) ---
+
+        # Age – centred around mid-30s, clamped to [22, 65]
+        self.age = self._generate_attribute(mu=38, sigma=7, lo=22, hi=65)
+
+        # Height (simple gendered Gaussian, in cm)
+        if self.gender == "male":
+            self.height_cm = self._generate_attribute(mu=180, sigma=7, lo=160, hi=200)
+        else:
+            self.height_cm = self._generate_attribute(mu=167, sigma=6, lo=150, hi=190)
+
+        # Years of service – capped so it never exceeds (age - 18)
+        raw_service_years = self._generate_attribute(mu=8, sigma=4, lo=0, hi=30)
+        self.years_of_service = min(raw_service_years, max(0, self.age - 18))
+
+        # Foundation-style clearance level
+        self.clearance_level = random.choice(
+            ["Level 1", "Level 2", "Level 3", "Level 4"]
+        )
+
+        # Simple morale “rating” (0–20). You can expand this later.
+        self.morale = self._generate_attribute(mu=11, sigma=3, lo=0, hi=20)
+
+        # --- Position & skill attributes ---
+
         if position is not None and position in self._positions:
             self.position = position
         else:
@@ -79,15 +105,13 @@ class Personnel:
             self.attributes[attr] = self._generate_attribute(mu=mu)
 
         # --- Mission / health state ---
-        self.status = "Active"   # Active / Injured / KIA
+        self.status = "Active"   # Active / Injured / KIA / On Leave etc.
         self.alive = True
         self.on_mission = False
 
         # --- Task / calendar state ---
-        # current_task: Task object or None
-        self.current_task = None
-        # day index (int) when this person becomes free again
-        self.busy_until_day = 0
+        self.current_task = None          # Task object or None
+        self.busy_until_day = 0           # day index when this person becomes free
 
     def __repr__(self):
         return f"{self.fname} {self.lname}"
