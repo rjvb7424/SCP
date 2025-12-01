@@ -12,6 +12,32 @@ ATTRIBUTE_GROUPS = {
     "Personal": ["discipline", "loyalty", "stress_resilience"],
 }
 
+def draw_paragraph(surface, text, rect, font, color=(220, 220, 220)):
+    """Simple word-wrapped paragraph inside a rect."""
+    if not text:
+        return
+
+    words = text.split()
+    line = ""
+    x, y = rect.x, rect.y
+    max_width = rect.width
+
+    for word in words:
+        test_line = line + (" " if line else "") + word
+        test_surf = font.render(test_line, True, color)
+        if test_surf.get_width() > max_width and line:
+            # draw current line and start a new one
+            line_surf = font.render(line, True, color)
+            surface.blit(line_surf, (x, y))
+            y += line_surf.get_height() + 2
+            line = word
+        else:
+            line = test_line
+
+    if line:
+        line_surf = font.render(line, True, color)
+        surface.blit(line_surf, (x, y))
+
 def draw_badge(surface, text, x, y, font,
                bg=(60, 60, 90), fg=(230, 230, 230),
                border=(140, 140, 200)):
@@ -249,15 +275,52 @@ def draw_personnel_page(
         flag_rect.centery = profile_rect.centery
         surface.blit(flag_image, flag_rect)
 
-    # --- Attributes panel (grouped, with bars) ---
+    # --- Attributes + Biography panels side by side ---
     attrs_top = profile_rect.bottom + 20
-    attrs_rect = pygame.Rect(margin, attrs_top, card_width, height - attrs_top - margin)
+    card_height = height - attrs_top - margin
+    card_height = max(card_height, 150)  # just in case window is short
 
+    # Left: attributes (about 2/3 width), Right: biography
+    inner_gap = 20
+    attrs_width = int(card_width * 0.65)
+    bio_width = card_width - attrs_width - inner_gap
+
+    attrs_rect = pygame.Rect(margin, attrs_top, attrs_width, card_height)
+    bio_rect = pygame.Rect(attrs_rect.right + inner_gap, attrs_top, bio_width, card_height)
+
+    # Safety: if the window is very narrow, fall back to full-width attributes
+    if bio_rect.width < 180:
+        attrs_rect.width = card_width
+        bio_rect.width = 0  # effectively hidden
+
+    # Draw attributes card
     pygame.draw.rect(surface, (40, 40, 40), attrs_rect, border_radius=8)
     pygame.draw.rect(surface, (90, 90, 90), attrs_rect, width=1, border_radius=8)
 
     header_surf = body_font.render("Attributes", True, (255, 255, 255))
     surface.blit(header_surf, (attrs_rect.x + 20, attrs_rect.y + 10))
+
+    # Colors for primary/secondary labels
+    primary_label_color = (255, 230, 170)   # warm gold
+    secondary_label_color = (170, 210, 255) # light blue
+    other_label_color = (210, 210, 210)     # normal grey
+
+    primary_set = getattr(person, "primary_attrs", set())
+    secondary_set = getattr(person, "secondary_attrs", set())
+
+    # Small legend
+    legend_y = attrs_rect.y + 10
+    legend_x = attrs_rect.x + 20 + header_surf.get_width() + 30
+
+    def draw_legend_item(x, label, color):
+        box = pygame.Rect(x, legend_y + 6, 12, 12)
+        pygame.draw.rect(surface, color, box, border_radius=3)
+        text_surf = body_font.render(label, True, (200, 200, 200))
+        surface.blit(text_surf, (box.right + 6, legend_y))
+        return text_surf.get_width() + box.width + 20
+
+    legend_x += draw_legend_item(legend_x, "Primary", primary_label_color)
+    legend_x += draw_legend_item(legend_x, "Secondary", secondary_label_color)
 
     group_items = list(ATTRIBUTE_GROUPS.items())
     left_groups = group_items[:3]
@@ -267,6 +330,87 @@ def draw_personnel_page(
     left_x = attrs_rect.x + 20
     right_x = attrs_rect.x + attrs_rect.width // 2 + 10
     start_y = attrs_rect.y + 40
+
+    def draw_group_column(groups, col_x):
+        y = start_y
+        for group_name, attrs in groups:
+            group_surf = body_font.render(group_name, True, (240, 240, 240))
+            surface.blit(group_surf, (col_x, y))
+            y += group_surf.get_height() + 2
+
+            for attr in attrs:
+                if attr not in person.attributes:
+                    continue
+
+                # Decide label color based on primary/secondary
+                if attr in primary_set:
+                    label_color = primary_label_color
+                elif attr in secondary_set:
+                    label_color = secondary_label_color
+                else:
+                    label_color = other_label_color
+
+                pretty_name = attr.replace("_", " ").title()
+                label_text = f"{pretty_name}: "
+                label_surf = body_font.render(label_text, True, label_color)
+
+                # Colored vertical marker to make primary/secondary pop at a distance
+                marker_height = body_font.get_height() - 4
+                marker_rect = pygame.Rect(col_x - 10, y + 2, 4, marker_height)
+                pygame.draw.rect(surface, label_color, marker_rect, border_radius=2)
+
+                surface.blit(label_surf, (col_x, y))
+
+                value = person.attributes[attr]
+                value_color = get_attribute_color(value)
+
+                value_surf = body_font.render(str(value), True, value_color)
+                value_x = col_x + label_surf.get_width() + 4
+                surface.blit(value_surf, (value_x, y))
+
+                # Small value bar (0–20)
+                bar_width = 80
+                bar_height = 4
+                bar_x = value_x + value_surf.get_width() + 10
+                bar_y = y + (value_surf.get_height() - bar_height) // 2
+
+                pygame.draw.rect(
+                    surface,
+                    (25, 25, 25),
+                    pygame.Rect(bar_x, bar_y, bar_width, bar_height),
+                    border_radius=2,
+                )
+                fill_w = int(bar_width * (value / 20.0))
+                pygame.draw.rect(
+                    surface,
+                    value_color,
+                    pygame.Rect(bar_x, bar_y, fill_w, bar_height),
+                    border_radius=2,
+                )
+
+                y += line_height
+
+            y += 8  # gap between groups
+
+    draw_group_column(left_groups, left_x)
+    draw_group_column(right_groups, right_x)
+
+    # --- Biography card on the right ---
+    if bio_rect.width > 0:
+        pygame.draw.rect(surface, (40, 40, 40), bio_rect, border_radius=8)
+        pygame.draw.rect(surface, (90, 90, 90), bio_rect, width=1, border_radius=8)
+
+        bio_header = body_font.render("Biography", True, (255, 255, 255))
+        surface.blit(bio_header, (bio_rect.x + 20, bio_rect.y + 10))
+
+        bio_text_rect = pygame.Rect(
+            bio_rect.x + 20,
+            bio_rect.y + 40,
+            bio_rect.width - 40,
+            bio_rect.height - 60,
+        )
+        biography_text = person.biography or "No biography on file."
+        draw_paragraph(surface, biography_text, bio_text_rect, body_font)
 
     def draw_group_column(groups, col_x):
         y = start_y
