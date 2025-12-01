@@ -278,9 +278,8 @@ def draw_personnel_page(
     # --- Attributes + Biography panels side by side ---
     attrs_top = profile_rect.bottom + 20
     card_height = height - attrs_top - margin
-    card_height = max(card_height, 150)  # just in case window is short
+    card_height = max(card_height, 150)
 
-    # Left: attributes (about 2/3 width), Right: biography
     inner_gap = 20
     attrs_width = int(card_width * 0.65)
     bio_width = card_width - attrs_width - inner_gap
@@ -288,10 +287,10 @@ def draw_personnel_page(
     attrs_rect = pygame.Rect(margin, attrs_top, attrs_width, card_height)
     bio_rect = pygame.Rect(attrs_rect.right + inner_gap, attrs_top, bio_width, card_height)
 
-    # Safety: if the window is very narrow, fall back to full-width attributes
+    # If window too narrow, hide bio and give full width to attributes
     if bio_rect.width < 180:
         attrs_rect.width = card_width
-        bio_rect.width = 0  # effectively hidden
+        bio_rect.width = 0
 
     # Draw attributes card
     pygame.draw.rect(surface, (40, 40, 40), attrs_rect, border_radius=8)
@@ -300,40 +299,71 @@ def draw_personnel_page(
     header_surf = body_font.render("Attributes", True, (255, 255, 255))
     surface.blit(header_surf, (attrs_rect.x + 20, attrs_rect.y + 10))
 
-    # Colors for primary/secondary labels
-    primary_label_color = (255, 230, 170)   # warm gold
-    secondary_label_color = (170, 210, 255) # light blue
-    other_label_color = (210, 210, 210)     # normal grey
+    # --- Colors / sets for primary & secondary highlighting ---
+    primary_bg      = (95, 80, 25)   # warm gold-ish
+    secondary_bg    = (40, 75, 115)  # soft blue
+    primary_text    = (250, 245, 225)
+    secondary_text  = (230, 240, 255)
+    normal_text     = (210, 210, 210)
 
     primary_set = getattr(person, "primary_attrs", set())
     secondary_set = getattr(person, "secondary_attrs", set())
 
-    # Small legend
+    # “Text highlighter” padding
+    highlight_pad = 6   # total extra width (3px each side)
+
+    # Legend (Primary / Secondary) using highlight style
     legend_y = attrs_rect.y + 10
     legend_x = attrs_rect.x + 20 + header_surf.get_width() + 30
 
-    def draw_legend_item(x, label, color):
-        box = pygame.Rect(x, legend_y + 6, 12, 12)
-        pygame.draw.rect(surface, color, box, border_radius=3)
-        text_surf = body_font.render(label, True, (200, 200, 200))
-        surface.blit(text_surf, (box.right + 6, legend_y))
-        return text_surf.get_width() + box.width + 20
+    def draw_legend_item(x, label, bg_color):
+        text_surf = body_font.render(label, True, (230, 230, 230))
+        tw, th = text_surf.get_size()
+        bg_rect = pygame.Rect(x, legend_y, tw + highlight_pad, th)
+        pygame.draw.rect(surface, bg_color, bg_rect, border_radius=3)
+        surface.blit(text_surf, (x + highlight_pad // 2, legend_y))
+        return bg_rect.width + 20
 
-    legend_x += draw_legend_item(legend_x, "Primary", primary_label_color)
-    legend_x += draw_legend_item(legend_x, "Secondary", secondary_label_color)
+    legend_x += draw_legend_item(legend_x, "Primary", primary_bg)
+    legend_x += draw_legend_item(legend_x, "Secondary", secondary_bg)
 
+    # --- Split groups into left/right columns ---
     group_items = list(ATTRIBUTE_GROUPS.items())
     left_groups = group_items[:3]
     right_groups = group_items[3:]
 
     line_height = body_font.get_linesize() + 4
     left_x = attrs_rect.x + 20
-    right_x = attrs_rect.x + attrs_rect.width // 2 + 10
+    # moved column 2 closer by subtracting instead of adding
+    right_x = attrs_rect.x + attrs_rect.width // 2 - 40
     start_y = attrs_rect.y + 40
 
-    def draw_group_column(groups, col_x):
+    # Fixed gap + square size for the “grid”
+    cell_gap = 16
+    cell_width = 32  # value squares
+
+    def compute_max_label_width(groups):
+        """Max label width in this column, including highlight padding."""
+        max_w = 0
+        for _, attrs in groups:
+            for attr in attrs:
+                if attr not in person.attributes:
+                    continue
+                pretty = attr.replace("_", " ").title()
+                label_text = f"{pretty}: "
+                w, _ = body_font.size(label_text)
+                w += highlight_pad  # account for highlight padding
+                if w > max_w:
+                    max_w = w
+        return max_w
+
+    left_label_width = compute_max_label_width(left_groups)
+    right_label_width = compute_max_label_width(right_groups)
+
+    def draw_group_column(groups, col_x, max_label_width):
         y = start_y
         for group_name, attrs in groups:
+            # Group header
             group_surf = body_font.render(group_name, True, (240, 240, 240))
             surface.blit(group_surf, (col_x, y))
             y += group_surf.get_height() + 2
@@ -342,58 +372,59 @@ def draw_personnel_page(
                 if attr not in person.attributes:
                     continue
 
-                # Decide label color based on primary/secondary
+                pretty = attr.replace("_", " ").title()
+                label_text = f"{pretty}: "
+                label_w, label_h = body_font.size(label_text)
+                label_rect = pygame.Rect(col_x, y, label_w, label_h)
+
+                # Decide highlight + text color
                 if attr in primary_set:
-                    label_color = primary_label_color
+                    bg_color = primary_bg
+                    text_color = primary_text
                 elif attr in secondary_set:
-                    label_color = secondary_label_color
+                    bg_color = secondary_bg
+                    text_color = secondary_text
                 else:
-                    label_color = other_label_color
+                    bg_color = None
+                    text_color = normal_text
 
-                pretty_name = attr.replace("_", " ").title()
-                label_text = f"{pretty_name}: "
-                label_surf = body_font.render(label_text, True, label_color)
+                # Draw highlight behind label if primary/secondary
+                pad_x = highlight_pad // 2
+                if bg_color is not None:
+                    bg_rect = pygame.Rect(
+                        label_rect.x - pad_x,
+                        label_rect.y,
+                        label_w + highlight_pad,
+                        label_h,
+                    )
+                    pygame.draw.rect(surface, bg_color, bg_rect, border_radius=3)
 
-                # Colored vertical marker to make primary/secondary pop at a distance
-                marker_height = body_font.get_height() - 4
-                marker_rect = pygame.Rect(col_x - 10, y + 2, 4, marker_height)
-                pygame.draw.rect(surface, label_color, marker_rect, border_radius=2)
+                label_surf = body_font.render(label_text, True, text_color)
+                surface.blit(label_surf, label_rect.topleft)
 
-                surface.blit(label_surf, (col_x, y))
+                # --- Value square (FM-style) ---
+                square_x = col_x + max_label_width + cell_gap
+                cell_h = label_h
+                cell_y = y
 
                 value = person.attributes[attr]
-                value_color = get_attribute_color(value)
+                cell_color = get_attribute_color(value)
+                cell_rect = pygame.Rect(square_x, cell_y, cell_width, cell_h)
 
-                value_surf = body_font.render(str(value), True, value_color)
-                value_x = col_x + label_surf.get_width() + 4
-                surface.blit(value_surf, (value_x, y))
+                pygame.draw.rect(surface, cell_color, cell_rect, border_radius=3)
+                pygame.draw.rect(surface, (15, 15, 15), cell_rect, width=1, border_radius=3)
 
-                # Small value bar (0–20)
-                bar_width = 80
-                bar_height = 4
-                bar_x = value_x + value_surf.get_width() + 10
-                bar_y = y + (value_surf.get_height() - bar_height) // 2
-
-                pygame.draw.rect(
-                    surface,
-                    (25, 25, 25),
-                    pygame.Rect(bar_x, bar_y, bar_width, bar_height),
-                    border_radius=2,
-                )
-                fill_w = int(bar_width * (value / 20.0))
-                pygame.draw.rect(
-                    surface,
-                    value_color,
-                    pygame.Rect(bar_x, bar_y, fill_w, bar_height),
-                    border_radius=2,
-                )
+                value_surf = body_font.render(str(value), True, (0, 0, 0))
+                value_rect = value_surf.get_rect(center=cell_rect.center)
+                surface.blit(value_surf, value_rect)
 
                 y += line_height
 
             y += 8  # gap between groups
 
-    draw_group_column(left_groups, left_x)
-    draw_group_column(right_groups, right_x)
+    # Draw both columns with a consistent grid in each
+    draw_group_column(left_groups, left_x, left_label_width)
+    draw_group_column(right_groups, right_x, right_label_width)
 
     # --- Biography card on the right ---
     if bio_rect.width > 0:
@@ -409,60 +440,8 @@ def draw_personnel_page(
             bio_rect.width - 40,
             bio_rect.height - 60,
         )
-        biography_text = person.biography or "No biography on file."
+        biography_text = getattr(person, "biography", "") or "No biography on file."
         draw_paragraph(surface, biography_text, bio_text_rect, body_font)
-
-    def draw_group_column(groups, col_x):
-        y = start_y
-        for group_name, attrs in groups:
-            # group header
-            group_surf = body_font.render(group_name, True, (240, 240, 240))
-            surface.blit(group_surf, (col_x, y))
-            y += group_surf.get_height() + 2
-
-            for attr in attrs:
-                if attr not in person.attributes:
-                    continue
-
-                pretty_name = attr.replace("_", " ").title()
-                label = f"{pretty_name}: "
-                label_surf = body_font.render(label, True, (210, 210, 210))
-                surface.blit(label_surf, (col_x, y))
-
-                value = person.attributes[attr]
-                value_color = get_attribute_color(value)
-
-                # numeric value
-                value_surf = body_font.render(str(value), True, value_color)
-                value_x = col_x + label_surf.get_width() + 4
-                surface.blit(value_surf, (value_x, y))
-
-                # small bar representing the value (0–20)
-                bar_width = 80
-                bar_height = 4
-                bar_x = value_x + value_surf.get_width() + 10
-                bar_y = y + (value_surf.get_height() - bar_height) // 2
-
-                # background bar
-                pygame.draw.rect(
-                    surface, (25, 25, 25),
-                    pygame.Rect(bar_x, bar_y, bar_width, bar_height),
-                    border_radius=2
-                )
-                # filled portion
-                fill_w = int(bar_width * (value / 20.0))
-                pygame.draw.rect(
-                    surface, value_color,
-                    pygame.Rect(bar_x, bar_y, fill_w, bar_height),
-                    border_radius=2
-                )
-
-                y += line_height
-
-            y += 8  # gap between groups
-
-    draw_group_column(left_groups, left_x)
-    draw_group_column(right_groups, right_x)
 
     # Return clickable rects for the staff selector
     return staff_menu_rects
