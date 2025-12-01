@@ -1,7 +1,5 @@
-# personnel.py
 import random
 import json
-
 
 class Personnel:
     with open("nationalities.json", "r") as f:
