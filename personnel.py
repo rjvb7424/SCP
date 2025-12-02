@@ -29,15 +29,12 @@ class Personnel:
         "surgery", "psychology", "first_aid",
     ]
 
-    @staticmethod
-    def _generate_attribute(mu, sigma=3, lo=0, hi=20):
-        """Return an int drawn from a normal distribution, clamped to [lo, hi]."""
+    def _generate_attribute(mu, sigma, lo=0, hi=20):
+        """Return an int drawn from a normal distribution."""
         value = random.gauss(mu, sigma)
         value = round(value)
         value = max(lo, min(hi, value))
         return int(value)
-
-    # -------- Backstory / biography generation --------
 
     def _generate_biography(self, site_name: str = "Site-██") -> str:
         """
