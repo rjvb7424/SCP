@@ -29,7 +29,8 @@ class Personnel:
         "surgery", "psychology", "first_aid",
     ]
 
-    def _generate_attribute(mu, sigma, lo=0, hi=20):
+    @staticmethod
+    def _generate_attribute(mu, sigma=4, lo=0, hi=20):
         """Return an int drawn from a normal distribution."""
         value = random.gauss(mu, sigma)
         value = round(value)

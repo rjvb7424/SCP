@@ -13,13 +13,7 @@ from operation import Operations, OperationRun
 from operations_page import draw_operations_page, draw_operation_execution_page
 
 
-
 class Game:
-    def update(self, dt: float):
-        # Only thing we need to update for now is an active operation run
-        if self.current_page == "operations" and self.active_operation_run is not None:
-            self.active_operation_run.update(dt)
-
     def __init__(self):
         pygame.init()
 
@@ -47,16 +41,16 @@ class Game:
         self.staff_roster = Staff(key_positions=KEY_POSITIONS, num_random=5)
         self.flag_images = [self.load_flag_image(p.flag_path) for p in self.staff_roster.members]
 
-        # --- Operations setup ---
-        self.operations_manager = Operations(num_operations=10)
-        self.operation_flag_images = [
-            self.load_flag_image(op.flag_path) for op in self.operations_manager.operations
-        ]
+        # --- Operations setup (disabled for now) ---
+        # self.operations_manager = Operations(num_operations=10)
+        # self.operation_flag_images = [
+        #     self.load_flag_image(op.flag_path) for op in self.operations_manager.operations
+        # ]
 
         # Operation runtime (cinematic execution)
         self.active_operation_run: OperationRun | None = None
 
-
+        # World map (used by operations originally; safe to keep loaded)
         try:
             self.world_map_image = pygame.image.load("world_map.jpg").convert()
         except pygame.error as e:
@@ -115,6 +109,13 @@ class Game:
         self.facility_roomtype_buttons = []
         self.facility_builder_buttons = []
         self.facility_cancel_build_rect = None
+
+    # ---------- Update ----------
+
+    def update(self, dt: float):
+        # Only thing we need to update for now is an active operation run
+        if self.current_page == "operations" and self.active_operation_run is not None:
+            self.active_operation_run.update(dt)
 
     # ---------- Init helpers ----------
 
@@ -178,7 +179,7 @@ class Game:
             if self.current_page == "personnel":
                 self.staff_roster.next()
             elif self.current_page == "operations":
-                self.operations_manager.next()
+                # self.operations_manager.next()
                 self.operation_mode = "view"
                 self.selected_team_indices.clear()
 
@@ -186,7 +187,7 @@ class Game:
             if self.current_page == "personnel":
                 self.staff_roster.previous()
             elif self.current_page == "operations":
-                self.operations_manager.previous()
+                # self.operations_manager.previous()
                 self.operation_mode = "view"
                 self.selected_team_indices.clear()
 
@@ -232,78 +233,17 @@ class Game:
                 break
 
     def handle_operations_click(self, mx, my):
-        # 1) Cinematic execution view handling
-        if self.active_operation_run is not None:
-            # If the run isn't finished yet, ignore clicks (just watch the log)
-            if not self.active_operation_run.finished:
-                return
-
-            # If it *is* finished, close the cinematic view
-            # but DO NOT return yet – let this same click be used to select a mission / press buttons
-            self.active_operation_run = None
-
-        # 2) Normal operations UI – first: select operation from map markers
-        for idx, rect in self.operation_marker_rects:
-            if rect.collidepoint(mx, my):
-                self.operations_manager.select(idx)
-                self.operation_mode = "view"
-                self.selected_team_indices.clear()
-                return
-
-        # 3) Info-panel interactions
-        if self.operation_mode == "view":
-            if self.op_execute_rect and self.op_execute_rect.collidepoint(mx, my):
-                op = self.operations_manager.current
-                if op and op.status == "Available":
-                    any_active = any(
-                        getattr(p, "status", "Active") == "Active"
-                        for p in self.staff_roster.members
-                    )
-                    if any_active:
-                        self.operation_mode = "assign"
-                        self.selected_team_indices.clear()
-
-        elif self.operation_mode == "assign":
-            # Select/deselect staff rows
-            for s_idx, rect in self.op_staff_item_rects:
-                if rect.collidepoint(mx, my):
-                    person = self.staff_roster.members[s_idx]
-                    if getattr(person, "status", "Active") == "Active":
-                        if s_idx in self.selected_team_indices:
-                            self.selected_team_indices.remove(s_idx)
-                        else:
-                            self.selected_team_indices.add(s_idx)
-                    return
-
-            # Cancel button
-            if self.op_cancel_rect and self.op_cancel_rect.collidepoint(mx, my):
-                self.operation_mode = "view"
-                self.selected_team_indices.clear()
-
-            # Confirm / Launch button
-            elif self.op_confirm_rect and self.op_confirm_rect.collidepoint(mx, my):
-                if self.selected_team_indices:
-                    team = []
-                    for s_idx in self.selected_team_indices:
-                        if 0 <= s_idx < len(self.staff_roster.members):
-                            person = self.staff_roster.members[s_idx]
-                            if getattr(person, "status", "Active") == "Active":
-                                team.append(person)
-                    if team:
-                        op = self.operations_manager.current
-                        if op:
-                            # Start the cinematic run instead of instant simulate()
-                            self.active_operation_run = OperationRun(op, team)
-
-                self.operation_mode = "view"
-                self.selected_team_indices.clear()
+        # Operations are temporarily disabled while refactoring
+        return
 
     def handle_calendar_click(self, mx, my):
+        # Select staff row
         for s_idx, rect in self.cal_staff_rows:
             if rect.collidepoint(mx, my):
                 self.calendar_selected_staff_index = s_idx
                 return
 
+        # Assign task to selected staff
         if (
             self.calendar_selected_staff_index is not None
             and 0 <= self.calendar_selected_staff_index < len(self.staff_roster.members)
@@ -321,6 +261,7 @@ class Game:
                         )
                     return
 
+        # Advance time
         if self.cal_continue_rect and self.cal_continue_rect.collidepoint(mx, my):
             self.current_day, finished_tasks = self.task_manager.advance_to_next_event(
                 self.current_day
@@ -483,48 +424,9 @@ class Game:
         )
 
     def draw_operations_page(self):
-        # If an operation is currently running, show the cinematic log view
-        if self.active_operation_run is not None:
-            draw_operation_execution_page(
-                self.screen,
-                self.active_operation_run,
-                self.title_font,
-                self.body_font,
-                self.WIDTH,
-                self.HEIGHT,
-                self.MENU_HEIGHT,
-            )
-            # Clear rects so hidden buttons/markers aren't accidentally clickable
-            self.operation_marker_rects = []
-            self.op_execute_rect = None
-            self.op_cancel_rect = None
-            self.op_confirm_rect = None
-            self.op_staff_item_rects = []
-            return
-
-        # Normal operations map / assign UI
-        (
-            self.operation_marker_rects,
-            self.op_execute_rect,
-            self.op_cancel_rect,
-            self.op_confirm_rect,
-            self.op_staff_item_rects,
-        ) = draw_operations_page(
-            self.screen,
-            self.world_map_image,
-            self.operations_manager,
-            self.operation_flag_images,
-            self.staff_roster,
-            self.operation_mode,
-            self.selected_team_indices,
-            self.title_font,
-            self.body_font,
-            self.WIDTH,
-            self.HEIGHT,
-            self.MENU_HEIGHT,
-        )
-
-
+        # Operations drawing disabled for now
+        # You could draw a simple placeholder text here if you want
+        return
 
     def draw_calendar_page(self):
         (
