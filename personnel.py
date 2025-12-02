@@ -2,16 +2,18 @@ import random
 import json
 
 class Personnel:
-    with open("nationalities.json", "r", encoding="utf-8") as f:
+    """Class representing a Foundation personnel member."""
+
+    with open("nationalities.json", "r") as f:
         _nationalities = json.load(f)
 
-    with open("names.json", "r", encoding="utf-8") as f:
+    with open("names.json", "r") as f:
         _names = json.load(f)
 
-    with open("positions.json", "r", encoding="utf-8") as f:
+    with open("positions.json", "r") as f:
         _positions = json.load(f)
 
-    with open("backstories.json", "r", encoding="utf-8") as f:
+    with open("backstories.json", "r") as f:
         _backstories = json.load(f)
 
     _all_attributes = [
