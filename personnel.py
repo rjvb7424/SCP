@@ -27,8 +27,6 @@ class Personnel:
         "adaptability", "determination", "negotiation",
         # medical attributes
         "surgery", "psychology", "first_aid",
-        # personal / personality attributes
-        "discipline", "loyalty", "stress_resilience",
     ]
 
     @staticmethod
