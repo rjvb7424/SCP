@@ -1,5 +1,5 @@
 import pygame
-from operations import Operations, OperationRun
+from operation import Operations, OperationRun
 
 def project_lat_lon_on_image(lat, lon, img_x, img_y, img_w, img_h):
     """

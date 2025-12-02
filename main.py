@@ -9,7 +9,7 @@ from ui_common import draw_menu, draw_anomalies_page
 from facility import Facility, BuildOrder
 from facility_page import draw_facility_page
 
-from operations import Operations, OperationRun
+from operation import Operations, OperationRun
 from operations_page import draw_operations_page, draw_operation_execution_page
 
 
