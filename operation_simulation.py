@@ -1,8 +1,12 @@
 import random
 
-def simulate(self, team):
+def calculate_danger_percentage(operative, anomaly):
+    danger_percent = max(0, anomaly.get_attribute("deception") - operative.get_attribute("deception"))/20
+    return danger_percent
+
+def simulate(self, task_force):
     """
-    Run the operation with the given team of Personnel.
+    
 
     Updates:
         - self.status
@@ -12,19 +16,9 @@ def simulate(self, team):
 
     Returns a dict with success flag and casualty lists.
     """
-    # Store team (for later display)
-    self.assigned_team = list(team)
+    # an operation simulation is comprised of various turns
 
-    # Scores
-    team_score = self._team_effective_score(team)             # 0–100
-    diff_score = self.anomaly_difficulty * 5.0                # 0–100
 
-    # Success chance: 50% base, +/- based on score difference
-    success_chance = 0.5 + (team_score - diff_score) / 100.0
-    success_chance = max(0.1, min(0.9, success_chance))       # clamp
-
-    roll = random.random()
-    success = roll < success_chance
 
     # Casualty risk: higher when anomaly is "stronger" than team
     hazard_margin = diff_score - team_score  # positive = dangerous
