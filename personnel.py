@@ -92,11 +92,13 @@ class Personnel:
         self.fname = random.choice(self._names["first_names"][self.first_language][self.gender])
         self.lname = random.choice(self._names["last_names"][self.first_language])
 
-        if position is None:
-            self.position = random.choice(list(self._positions.keys()))
-        else:
+        # a postion will be generated if none is provided or if the provided one is invalid
+        if position is not None and position in self._positions:
             self.position = position
+        else:
+            self.position = random.choice(list(self._positions.keys()))
 
+        # fetch primary and secondary attributes for this position
         self.primary_attrs = set(self._positions[self.position].get("primary", []))
         self.secondary_attrs = set(self._positions[self.position].get("secondary", []))
 
@@ -104,12 +106,16 @@ class Personnel:
         SECONDARY_MU = 10
         OTHER_MU = 8
 
+        # generate attributes
         self.attributes = {}
         for attr in self._all_attributes:
+            # if primary attribute, use higher mean
             if attr in self.primary_attrs:
                 mu = PRIMARY_MU
+            # if secondary attribute, use lower mean
             elif attr in self.secondary_attrs:
                 mu = SECONDARY_MU
+            # otherwise, use base mean
             else:
                 mu = OTHER_MU
             self.attributes[attr] = self._generate_gauss(mu=mu, sigma=3, lo=0, hi=20)
