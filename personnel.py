@@ -4,8 +4,8 @@ import json
 class Personnel:
     """Class representing a Foundation personnel member."""
 
-    with open("nationalities.json", "r") as f:
-        _nationalities = json.load(f)
+    with open("countries.json", "r") as f:
+        _countries = json.load(f)
 
     with open("names.json", "r") as f:
         _names = json.load(f)
@@ -78,30 +78,19 @@ class Personnel:
     # -------- Normal init --------
 
     def __init__(self, position=None):
-        # --- Identity ---
+        # personnel identity
         self.gender = random.choice(["male", "female"])
-
-        # nationality + language
-        self.nationality = random.choice(list(self._nationalities.keys()))
-        self.first_language = random.choice(
-            self._nationalities[self.nationality]["languages"]
-        )
-
-        # generate first and last names based on the personnel's first language
-        self.fname = random.choice(
-            self._names["first_names"][self.first_language][self.gender]
-        )
-        self.lname = random.choice(self._names["last_names"][self.first_language])
-
-        # build the flag path from the country field
-        country = self._nationalities[self.nationality]["country"]
-        country_for_file = country.replace(" ", "_")
-        self.flag_path = f"flags/Flag_of_{country_for_file}.png"
-
         self.age = self._generate_gauss(mu=27, sigma=4, lo=22, hi=35)
-        
-        # give the personnel a position if specified, otherwise pick one at random
 
+        # select a random country of origin
+        country_of_origin = random.choice(list(self._countries.keys()))
+        self.nationality = country_of_origin["nationality"]
+        self.city_of_birth = random.choice(country_of_origin["cities"])
+        self.first_language = random.choice(list(country_of_origin["languages"]))
+
+        # generate first and last names based on the first language
+        self.fname = random.choice(self._names["first_names"][self.first_language][self.gender])
+        self.lname = random.choice(self._names["last_names"][self.first_language])
 
         if position is None:
             self.position = random.choice(list(self._positions.keys()))
