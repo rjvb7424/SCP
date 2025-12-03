@@ -48,14 +48,28 @@ class Personnel:
         self.age = self._generate_gauss(mu=27, sigma=4, lo=22, hi=35)
 
         # select a random country of origin
-        country_of_origin = random.choice(list(self._countries.keys()))
-        self.nationality = country_of_origin["nationality"]
-        self.city_of_birth = random.choice(country_of_origin["cities"])
-        self.first_language = random.choice(list(country_of_origin["languages"]))
+        country_name = random.choice(list(self._countries.keys()))
+        country_data = self._countries[country_name]
+
+        self.country = country_name                      # if you want to store it
+        self.nationality = country_data["nationality"]
+
+        # pick a birth city (dict with city/lat/lon)
+        city_data = random.choice(country_data["cities"])
+        self.city_of_birth = city_data["city"]
+        self.city_lat = city_data["lat"]
+        self.city_lon = city_data["lon"]
+
+        # pick first language used for name generation
+        self.first_language = random.choice(country_data["languages"])
 
         # generate first and last names based on the first language
-        self.fname = random.choice(self._names["first_names"][self.first_language][self.gender])
-        self.lname = random.choice(self._names["last_names"][self.first_language])
+        self.fname = random.choice(
+            self._names["first_names"][self.first_language][self.gender]
+        )
+        self.lname = random.choice(
+            self._names["last_names"][self.first_language]
+        )
 
         # a postion will be generated if none is provided or if the provided one is invalid
         if position is not None and position in self._positions:

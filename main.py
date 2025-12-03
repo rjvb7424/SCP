@@ -39,7 +39,6 @@ class Game:
         ]
 
         self.staff_roster = Staff(key_positions=KEY_POSITIONS, num_random=5)
-        self.flag_images = [self.load_flag_image(p.flag_path) for p in self.staff_roster.members]
 
         # --- Operations setup (disabled for now) ---
         # self.operations_manager = Operations(num_operations=10)
@@ -243,24 +242,6 @@ class Game:
                 self.calendar_selected_staff_index = s_idx
                 return
 
-        # Assign task to selected staff
-        if (
-            self.calendar_selected_staff_index is not None
-            and 0 <= self.calendar_selected_staff_index < len(self.staff_roster.members)
-        ):
-            person = self.staff_roster.members[self.calendar_selected_staff_index]
-            for task_def, rect in self.cal_task_buttons:
-                if rect.collidepoint(mx, my):
-                    if person.status == "Active" and person.current_task is None:
-                        self.task_manager.create_task(
-                            task_def["name"],
-                            person,
-                            self.current_day,
-                            task_def["duration"],
-                            task_def["description"],
-                        )
-                    return
-
         # Advance time
         if self.cal_continue_rect and self.cal_continue_rect.collidepoint(mx, my):
             self.current_day, finished_tasks = self.task_manager.advance_to_next_event(
@@ -407,12 +388,10 @@ class Game:
 
         person = self.staff_roster.current
         idx = self.staff_roster.current_index
-        flag_image = self.flag_images[idx] if 0 <= idx < len(self.flag_images) else None
 
         self.staff_menu_rects = draw_personnel_page(
             self.screen,
             person,
-            flag_image,
             self.title_font,
             self.body_font,
             self.WIDTH,

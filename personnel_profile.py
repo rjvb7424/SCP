@@ -90,7 +90,6 @@ def get_attribute_color(value, lo=0, hi=20):
 def draw_personnel_page(
     surface,
     person,
-    flag_image,
     title_font,
     body_font,
     width,
@@ -195,31 +194,6 @@ def draw_personnel_page(
     name_surf = title_font.render(name_text, True, (255, 255, 255))
     surface.blit(name_surf, (text_x, name_y))
 
-    # Status & mission badges beside name (FM-style chips)
-    status_color_bg = (70, 110, 70) if person.status == "Active" else (130, 80, 80)
-    status_text = f"STATUS: {person.status.upper()}"
-    status_rect = draw_badge(
-        surface,
-        status_text,
-        text_x + name_surf.get_width() + 20,
-        name_y + 4,
-        body_font,
-        bg=status_color_bg,
-        fg=(235, 235, 235),
-        border=(140, 200, 140) if person.status == "Active" else (200, 140, 140),
-    )
-
-    mission_label = "ON MISSION" if person.on_mission else "ON SITE"
-    mission_rect = draw_badge(
-        surface,
-        mission_label,
-        status_rect.right + 10,
-        name_y + 4,
-        body_font,
-        bg=(60, 60, 60),
-        fg=(220, 220, 220),
-        border=(120, 120, 120),
-    )
 
     # Base line for the info block (two columns)
     base_info_y = name_y + title_font.get_height() + 10
@@ -247,13 +221,6 @@ def draw_personnel_page(
         info_y = base_info_y + i * line_height
         info_surf = body_font.render(line, True, (220, 220, 220))
         surface.blit(info_surf, (right_x, info_y))
-
-    # Flag on the RIGHT
-    if flag_image is not None:
-        flag_rect = flag_image.get_rect()
-        flag_rect.right = profile_rect.right - 20
-        flag_rect.centery = profile_rect.centery
-        surface.blit(flag_image, flag_rect)
 
     # --- Attributes + Biography panels side by side ---
     attrs_top = profile_rect.bottom + 20
