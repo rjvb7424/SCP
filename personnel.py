@@ -30,8 +30,8 @@ class Personnel:
     ]
 
     @staticmethod
-    def _generate_attribute(mu, sigma=4, lo=0, hi=20):
-        """Return an int drawn from a normal distribution."""
+    def _generate_gauss(mu: int, sigma: int, lo: int, hi: int) -> int:
+        """Return an integer from a normal distribution."""
         value = random.gauss(mu, sigma)
         value = round(value)
         value = max(lo, min(hi, value))
@@ -98,35 +98,15 @@ class Personnel:
         country_for_file = country.replace(" ", "_")
         self.flag_path = f"flags/Flag_of_{country_for_file}.png"
 
-        # --- Demographic / physical info (FM-style profile numbers) ---
+        self.age = self._generate_gauss(mu=27, sigma=4, lo=22, hi=35)
+        
+        # give the personnel a position if specified, otherwise pick one at random
 
-        # Age – centred around mid-30s, clamped to [22, 65]
-        self.age = self._generate_attribute(mu=38, sigma=7, lo=22, hi=65)
 
-        # Height (simple gendered Gaussian, in cm)
-        if self.gender == "male":
-            self.height_cm = self._generate_attribute(mu=180, sigma=7, lo=160, hi=200)
-        else:
-            self.height_cm = self._generate_attribute(mu=167, sigma=6, lo=150, hi=190)
-
-        # Years of service – capped so it never exceeds (age - 18)
-        raw_service_years = self._generate_attribute(mu=8, sigma=4, lo=0, hi=30)
-        self.years_of_service = min(raw_service_years, max(0, self.age - 18))
-
-        # Foundation-style clearance level
-        self.clearance_level = random.choice(
-            ["Level 1", "Level 2", "Level 3", "Level 4"]
-        )
-
-        # Simple morale “rating” (0–20). You can expand this later.
-        self.morale = self._generate_attribute(mu=11, sigma=3, lo=0, hi=20)
-
-        # --- Position & skill attributes ---
-
-        if position is not None and position in self._positions:
-            self.position = position
-        else:
+        if position is None:
             self.position = random.choice(list(self._positions.keys()))
+        else:
+            self.position = position
 
         self.primary_attrs = set(self._positions[self.position].get("primary", []))
         self.secondary_attrs = set(self._positions[self.position].get("secondary", []))
@@ -143,7 +123,7 @@ class Personnel:
                 mu = SECONDARY_MU
             else:
                 mu = OTHER_MU
-            self.attributes[attr] = self._generate_attribute(mu=mu)
+            self.attributes[attr] = self._generate_gauss(mu=mu, sigma=3, lo=0, hi=20)
 
         # --- Mission / health state ---
         self.status = "Active"   # Active / Injured / KIA / On Leave etc.

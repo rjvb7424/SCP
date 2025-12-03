@@ -228,13 +228,11 @@ def draw_personnel_page(
     left_info = [
         f"Gender: {person.gender.capitalize()}",
         f"Age: {person.age}",
-        f"Height: {person.height_cm} cm",
     ]
 
     right_info = [
         f"Nationality: {person.nationality}",
         f"Position: {person.position}",
-        f"Clearance: {person.clearance_level}",
     ]
 
     # Left column
@@ -249,24 +247,6 @@ def draw_personnel_page(
         info_y = base_info_y + i * line_height
         info_surf = body_font.render(line, True, (220, 220, 220))
         surface.blit(info_surf, (right_x, info_y))
-
-    # Bottom line: years of service + language + morale summary
-    bottom_y = profile_rect.bottom - body_font.get_linesize() - 12
-    service_text = f"Years of Service: {person.years_of_service}"
-    language_text = f"Primary Language: {person.first_language}"
-    # Simple morale descriptor based on 0–20 scale
-    if person.morale >= 15:
-        morale_label = "Morale: Excellent"
-    elif person.morale >= 10:
-        morale_label = "Morale: Stable"
-    elif person.morale >= 5:
-        morale_label = "Morale: Low"
-    else:
-        morale_label = "Morale: Critical"
-
-    footer_line = f"{service_text}   |   {language_text}   |   {morale_label}"
-    footer_surf = body_font.render(footer_line, True, (190, 190, 190))
-    surface.blit(footer_surf, (text_x, bottom_y))
 
     # Flag on the RIGHT
     if flag_image is not None:
