@@ -13,9 +13,6 @@ class Personnel:
     with open("positions.json", "r") as f:
         _positions = json.load(f)
 
-    with open("backstories.json", "r") as f:
-        _backstories = json.load(f)
-
     _all_attributes = [
         # administrative attributes
         "leadership", "logistics", "planning",
@@ -37,47 +34,15 @@ class Personnel:
         value = max(lo, min(hi, value))
         return int(value)
 
-    def _generate_biography(self, site_name: str = "Site-██") -> str:
-        """
-        Build a biography by stitching together a childhood and adulthood
-        backstory template from backstories.json and filling in placeholders.
-        """
-        # pronouns
-        if self.gender == "male":
-            he_she = "he"
-            him_her = "him"
-            his_her = "his"
-        else:
-            he_she = "she"
-            him_her = "her"
-            his_her = "her"
-
-        ctx = {
-            "fname": self.fname,
-            "lname": self.lname,
-            "country": self.nationality,
-            "first_language": self.first_language,
-            "position": self.position,
-            "position_lower": self.position.lower(),
-            "site": site_name,
-            "he_she": he_she,
-            "him_her": him_her,
-            "his_her": his_her,
-        }
-
-        def fill(template: str) -> str:
-            for key, value in ctx.items():
-                template = template.replace("{" + key + "}", value)
-            return template
-
-        child_tpl = random.choice(self._backstories["childhood"])
-        adult_tpl = random.choice(self._backstories["adulthood"])
-
-        return fill(child_tpl) + " " + fill(adult_tpl)
-
-    # -------- Normal init --------
-
     def __init__(self, position=None):
+        # basic flags
+        self.isAlive = True
+        self.isInjured = False
+
+        # task management
+        self.current_task = None
+        self.busy_until_day = 0
+
         # personnel identity
         self.gender = random.choice(["male", "female"])
         self.age = self._generate_gauss(mu=27, sigma=4, lo=22, hi=35)
@@ -120,17 +85,5 @@ class Personnel:
                 mu = OTHER_MU
             self.attributes[attr] = self._generate_gauss(mu=mu, sigma=3, lo=0, hi=20)
 
-        # --- Mission / health state ---
-        self.status = "Active"   # Active / Injured / KIA / On Leave etc.
-        self.alive = True
-        self.on_mission = False
-
-        # --- Task / calendar state ---
-        self.current_task = None          # Task object or None
-        self.busy_until_day = 0           # day index when this person becomes free
-
-        # --- Biography / backstory ---
-        self.biography = self._generate_biography()
-
     def __repr__(self):
-        return f"{self.fname} {self.lname}"
+        return f"{self.fname.capitalize()} {self.lname.capitalize()}"
