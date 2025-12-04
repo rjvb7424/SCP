@@ -1,6 +1,7 @@
 import pygame
 import sys
 
+from anomaly import Anomaly
 from staff import Staff
 from personnel_profile import draw_personnel_page
 from tasks import TaskManager
@@ -38,6 +39,8 @@ class Game:
             "Chief of Security",
             "Chief Researcher",
         ]
+        
+        self.contained_anomalies = [Anomaly() for _ in range(3)]
 
         self.staff_roster = Staff(key_positions=KEY_POSITIONS, num_random=5)
 
@@ -372,7 +375,7 @@ class Game:
         if self.current_page == "personnel":
             self.draw_personnel_page()
         elif self.current_page == "anomalies":
-            draw_anomalies_page(self.screen, self.body_font, self.MENU_HEIGHT)
+            draw_anomalies_page(self.screen, self.body_font, self.MENU_HEIGHT, self.contained_anomalies)
         elif self.current_page == "operations":
             self.draw_operations_page()
         elif self.current_page == "calendar":
