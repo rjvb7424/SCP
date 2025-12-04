@@ -1,29 +1,31 @@
 import random
 import json
 
-def generate_description():
-    with open("anomaly_descriptions.txt", "r") as f:
-        descriptions = [line.strip() for line in f if line.strip()]
-    return random.choice(descriptions)
-
 class Anomaly:
     with open("anomaly_names.json", "r") as f:
-        an_data = json.load(f)
+        _names = json.load(f)
+
+    _all_attributes = [
+        # combat attributes
+        "lethality", "deception", "physical_fitness",
+    ]
+
+    @staticmethod
+    def _generate_gauss(mu: int, sigma: int, lo: int, hi: int) -> int:
+        """Return an integer from a normal distribution."""
+        value = random.gauss(mu, sigma)
+        value = round(value)
+        value = max(lo, min(hi, value))
+        return int(value)
 
     def __init__(self):
-        # anomaly identity
-        self.morphotype = random.choice(["humanoid", "quadrupedal"])
-        self.name = "The " + random.choice(self.an_data["adjectives"]) + " " + random.choice(self.an_data["nouns"])
-        self.description = generate_description()
-        # anomaly attributes
+        # identity
+        self.name = "The " + random.choice(self._names["adjectives"]) + " " + random.choice(self._names["nouns"])
+
+        # generate attributes
         self.attributes = {}
-        # combat attributes
-        self.attributes["resilience"] = random.randint(0, 20)
-        self.attributes["deception"] = random.randint(0, 20)
-        self.attributes["evasion"] = random.randint(0, 20)
-    
-    def get_description(self):
-        return self.description
-    
+        for attr in self._all_attributes:
+            self.attributes[attr] = self._generate_gauss(mu=10, sigma=3, lo=0, hi=20)
+
     def __repr__(self):
         return f"{self.name}"
