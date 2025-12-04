@@ -34,29 +34,24 @@ DENY_BORDER_COLOR = (210, 140, 140)
 
 BUTTON_BORDER_RADIUS = 4
 
+def _draw_text(surface, text, x, y, font_size, color):
+    """Internal helper for drawing text and returning the new y position."""
+    font = pygame.font.SysFont(FONT, font_size)
+    text_surf = font.render(text, True, color)
+    surface.blit(text_surf, (x, y))
+    return y + text_surf.get_height() + 4
 
 def draw_title_text(surface, text, x, y, color=COLOR):
     """Draws title text on the given surface and returns the new y position."""
-    font = pygame.font.SysFont(FONT, TITLE_SIZE)
-    text_surf = font.render(text, True, color)
-    surface.blit(text_surf, (x, y))
-    return y + text_surf.get_height() + 4
-
+    return _draw_text(surface, text, x, y, TITLE_SIZE, color)
 
 def draw_body_text(surface, text, x, y, color=COLOR):
     """Draws body text on the given surface and returns the new y position."""
-    font = pygame.font.SysFont(FONT, BODY_SIZE)
-    text_surf = font.render(text, True, color)
-    surface.blit(text_surf, (x, y))
-    return y + text_surf.get_height() + 4
-
+    return _draw_text(surface, text, x, y, BODY_SIZE, color)
 
 def draw_footer_text(surface, text, x, y, color=COLOR):
     """Draws footer text on the given surface and returns the new y position."""
-    font = pygame.font.SysFont(FONT, FOOTER_SIZE)
-    text_surf = font.render(text, True, color)
-    surface.blit(text_surf, (x, y))
-    return y + text_surf.get_height() + 4
+    return _draw_text(surface, text, x, y, FOOTER_SIZE, color)
 
 def _draw_button(surface, text, x, y, width, height, bg_color, hover_color, text_color, border_color):
     """Internal helper used by all button types."""
