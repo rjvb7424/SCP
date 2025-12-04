@@ -5,9 +5,10 @@ from staff import Staff
 from personnel_profile import draw_personnel_page
 from tasks import TaskManager
 from calendar_page import draw_calendar_page
-from ui_common import draw_menu, draw_anomalies_page
+from ui_common import draw_menu
 from facility import Facility, BuildOrder
 from facility_page import draw_facility_page
+from anomalies_page import draw_anomalies_page
 
 from operation import Operations, OperationRun
 from operations_page import draw_operations_page, draw_operation_execution_page
