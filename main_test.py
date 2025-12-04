@@ -1,23 +1,24 @@
-# main.py
+# external imports
 import pygame
+# internal imports
 from anomalies_page import draw_anomalies_page
 from anomaly import Anomaly
-
 
 def main():
     pygame.init()
 
+    # constants
     WIDTH, HEIGHT = 900, 600
     MENU_HEIGHT = 40
 
+    # pygame setup
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     pygame.display.set_caption("UI Button Test")
     clock = pygame.time.Clock()
 
     anomalies = [Anomaly() for _ in range(3)]
 
-    secure_anomalies_button_rect = None
-
+    # main loop
     running = True
     while running:
         for event in pygame.event.get():
@@ -26,22 +27,14 @@ def main():
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mx, my = event.pos
-
+                # check for button clicks
                 if (add_anomaly_button_rect.collidepoint(mx, my)):
                     anomalies[1].name = "New Anomaly"
-                if (
-                    secure_anomalies_button_rect
-                    and secure_anomalies_button_rect.collidepoint(mx, my)
-                ):
+                if (secure_anomalies_button_rect.collidepoint(mx, my)):
                     print("Secure Anomalies clicked!")
 
-        # ---- DRAW ----
-        screen.fill((20, 20, 25))  # background
 
-        # (Optional) fake menu bar so you can see MENU_HEIGHT
-        pygame.draw.rect(
-            screen, (30, 30, 40), pygame.Rect(0, 0, WIDTH, MENU_HEIGHT)
-        )
+        screen.fill((20, 20, 25))  # background
 
         (
             add_anomaly_button_rect,
@@ -53,6 +46,6 @@ def main():
 
     pygame.quit()
 
-
+# run the main function
 if __name__ == "__main__":
     main()
