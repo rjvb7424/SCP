@@ -66,7 +66,7 @@ def _draw_button(surface, text, x, y, width, height, bg_color, hover_color, text
     # draw button border
     pygame.draw.rect(surface, border_color, rect, width=1, border_radius=BUTTON_BORDER_RADIUS)
     # draw button text
-    font = pygame.font.SysFont(FONT, BUTTON_SIZE, bold=True)
+    font = pygame.font.SysFont(FONT, BUTTON_SIZE)
     text_surf = font.render(text, True, text_color)
     text_rect = text_surf.get_rect(center=rect.center)
     surface.blit(text_surf, text_rect)
