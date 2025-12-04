@@ -375,7 +375,7 @@ class Game:
         if self.current_page == "personnel":
             self.draw_personnel_page()
         elif self.current_page == "anomalies":
-            draw_anomalies_page(self.screen, self.body_font, self.MENU_HEIGHT, self.contained_anomalies)
+            draw_anomalies_page(self.screen, self.MENU_HEIGHT, self.contained_anomalies)
         elif self.current_page == "operations":
             self.draw_operations_page()
         elif self.current_page == "calendar":
