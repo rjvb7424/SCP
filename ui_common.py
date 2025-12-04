@@ -1,12 +1,6 @@
 # ui_common.py
 import pygame
 
-def draw_text(surface, text, x, y, font, color=(220, 220, 220)):
-    text_surf = font.render(text, True, color)
-    surface.blit(text_surf, (x, y))
-    return y + text_surf.get_height() + 4
-
-
 def draw_menu(surface, menu_items, current_page, menu_font, width, menu_height):
     pygame.draw.rect(surface, (20, 20, 20), (0, 0, width, menu_height))
 
