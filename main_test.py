@@ -2,6 +2,7 @@
 import pygame
 # internal imports
 from anomalies_page import draw_anomalies_page
+from anomaly_page import draw_anomaly_page
 from anomaly import Anomaly
 
 def main():
@@ -9,7 +10,6 @@ def main():
 
     # constants
     WIDTH, HEIGHT = 900, 600
-    MENU_HEIGHT = 40
 
     # pygame setup
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -29,14 +29,14 @@ def main():
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mx, my = event.pos
                 # check for button clicks
-                if (add_anomaly_button_rect.collidepoint(mx, my)):
-                    anomalies[1].name = "New Anomaly"
-                if (secure_anomalies_button_rect.collidepoint(mx, my)):
-                    print("Secure Anomalies clicked!")
+                # if (add_anomaly_button_rect.collidepoint(mx, my)):
+                    # anomalies[1].name = "New Anomaly"
+                # if (secure_anomalies_button_rect.collidepoint(mx, my)):
+                    # print("Secure Anomalies clicked!")
 
         screen.fill((20, 20, 25))  # background
 
-        (add_anomaly_button_rect,secure_anomalies_button_rect,) = draw_anomalies_page(screen, MENU_HEIGHT, anomalies)
+        draw_anomaly_page(screen, anomalies[0])
 
         pygame.display.flip()
         clock.tick(60)

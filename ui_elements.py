@@ -7,6 +7,7 @@ pygame.font.init()
 FONT = "arial"
 COLOR = (220, 220, 220)
 TITLE_FONT = pygame.font.SysFont(FONT, 24)
+HEADER_FONT = pygame.font.SysFont(FONT, 20)
 BODY_FONT = pygame.font.SysFont(FONT, 16)
 FOOTER_FONT = pygame.font.SysFont(FONT, 14)
 
@@ -46,6 +47,10 @@ def _draw_text(surface, text, x, y, font, color):
 def draw_title_text(surface, text, x, y, color=COLOR):
     """Draws title text on the given surface and returns the new y position."""
     return _draw_text(surface, text, x, y, TITLE_FONT, color)
+
+def draw_header_text(surface, text, x, y, color=COLOR):
+    """Draws header text on the given surface and returns the new y position."""
+    return _draw_text(surface, text, x, y, HEADER_FONT, color)
 
 def draw_body_text(surface, text, x, y, color=COLOR):
     """Draws body text on the given surface and returns the new y position."""

@@ -27,5 +27,14 @@ class Anomaly:
         for attr in self._all_attributes:
             self.attributes[attr] = self._generate_gauss(mu=10, sigma=3, lo=0, hi=20)
 
+        # special containment procedures
+        self.containment_procedures = "Standard containment procedures apply."
+
     def __repr__(self):
         return f"{self.name}"
+    
+    def get_name(self) -> str:
+        return self.name
+
+    def get_containment_procedures(self) -> str:
+        return self.containment_procedures
