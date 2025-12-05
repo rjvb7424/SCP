@@ -1,43 +1,38 @@
 import pygame
 
+# font constants
 FONT = "arial"
 COLOR = (220, 220, 220)
+TITLE_FONT = pygame.font.SysFont(FONT, 24)
+BODY_FONT = pygame.font.SysFont(FONT, 16)
+FOOTER_FONT = pygame.font.SysFont(FONT, 14)
 
-TITLE_SIZE = 24
-BODY_SIZE = 16
-FOOTER_SIZE = 14
-BUTTON_SIZE = 16
+# button constants
+BUTTON_BORDER_RADIUS = 4
 
-TITLE_FONT = pygame.font.SysFont(FONT, TITLE_SIZE)
-BODY_FONT = pygame.font.SysFont(FONT, BODY_SIZE)
-FOOTER_FONT = pygame.font.SysFont(FONT, FOOTER_SIZE)
-BUTTON_FONT = pygame.font.SysFont(FONT, BUTTON_SIZE)
-
-# Primary button colours
+# primary button colours
 BUTTON_BG = (50, 50, 70)
 BUTTON_BG_HOVER = (80, 80, 120)
 BUTTON_TEXT_COLOR = (240, 240, 240)
 BUTTON_BORDER_COLOR = (180, 180, 200)
 
-# Secondary button colours (more neutral)
+# secondary button colours
 SECONDARY_BG = (40, 40, 40)
 SECONDARY_BG_HOVER = (70, 70, 70)
 SECONDARY_TEXT_COLOR = (230, 230, 230)
 SECONDARY_BORDER_COLOR = (160, 160, 160)
 
-# Accept (confirm) button colours (green-ish)
+# confirm action button colours
 ACCEPT_BG = (40, 90, 40)
 ACCEPT_BG_HOVER = (60, 130, 60)
 ACCEPT_TEXT_COLOR = (230, 255, 230)
 ACCEPT_BORDER_COLOR = (120, 200, 120)
 
-# Deny (cancel) button colours (red-ish)
+# cancel action button colours
 DENY_BG = (110, 40, 40)
 DENY_BG_HOVER = (150, 60, 60)
 DENY_TEXT_COLOR = (255, 230, 230)
 DENY_BORDER_COLOR = (210, 140, 140)
-
-BUTTON_BORDER_RADIUS = 4
 
 def _draw_text(surface, text, x, y, font, color):
     """Internal helper for drawing text and returning the new y position."""
@@ -70,8 +65,7 @@ def _draw_button(surface, text, x, y, width, height, bg_color, hover_color, text
     # draw button border
     pygame.draw.rect(surface, border_color, rect, width=1, border_radius=BUTTON_BORDER_RADIUS)
     # draw button text
-    font = pygame.font.SysFont(FONT, BUTTON_SIZE)
-    text_surf = font.render(text, True, text_color)
+    text_surf = BODY_FONT.render(text, True, text_color)
     text_rect = text_surf.get_rect(center=rect.center)
     surface.blit(text_surf, text_rect)
     # return the button rectangle for event handling
