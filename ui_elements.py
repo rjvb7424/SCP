@@ -1,5 +1,8 @@
 import pygame
 
+# initialize pygame font module
+pygame.font.init() 
+
 # font constants
 FONT = "arial"
 COLOR = (220, 220, 220)
