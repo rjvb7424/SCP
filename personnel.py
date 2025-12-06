@@ -99,5 +99,30 @@ class Personnel:
                 mu = OTHER_MU
             self.attributes[attr] = self._generate_gauss(mu=mu, sigma=3, lo=0, hi=20)
 
+        self.known_attributes = set() # subset of attr names we actually know
+
+        for attr in self._all_attributes:
+            value = self._generate_gauss(mu=10, sigma=3, lo=0, hi=20)
+            self.attributes[attr] = value
+
+            # 70% chance Foundation has solid data on this attribute
+            if random.random() < 0.7:
+                self.known_attributes.add(attr)
+
     def __repr__(self):
         return f"{self.fname.capitalize()} {self.lname.capitalize()}"
+    
+    def get_full_name(self) -> str:
+        return f"{self.fname.capitalize()} {self.lname.capitalize()}"
+    
+    def get_attribute_items(self):
+        """
+        Returns a list of (attribute_name, value, is_known) in a fixed order.
+        """
+        items = []
+        for attr in self._all_attributes:
+            value = self.attributes[attr]
+            known = attr in self.known_attributes
+            items.append((attr, value, known))
+        return items
+

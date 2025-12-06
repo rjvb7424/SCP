@@ -6,6 +6,8 @@ from anomaly import Anomaly
 from ui_elements import draw_title_text, draw_body_text, draw_primary_button, draw_secondary_button
 from sidebar_menu import draw_sidebar
 from top_bar import draw_top_bar, TOP_BAR_HEIGHT
+from staff_page import draw_staff_page
+from personnel import Personnel
 
 
 def main():
@@ -15,10 +17,8 @@ def main():
     WIDTH, HEIGHT = display_info.current_w, display_info.current_h
 
     PAGES = [
+        ("staff", "Staff"),
         ("anomalies", "Anomalies"),
-        ("anomaly",   "Anomaly Detail"),
-        ("research",  "Research"),
-        ("facility",  "Facility"),
     ]
     SIDEBAR_WIDTH = 200
     CONTENT_X = SIDEBAR_WIDTH + 30
@@ -28,6 +28,7 @@ def main():
     clock = pygame.time.Clock()
 
     anomalies = [Anomaly() for _ in range(3)]
+    staff = [Personnel() for _ in range(5)]
 
     # dummy facility resources (swap later with real game state)
     resources = {
@@ -39,8 +40,12 @@ def main():
 
     current_page = "anomalies"
     sidebar_button_rects = {}
+
     selected_anomaly_index = 0
     anomaly_menu_rects = {}
+
+    selected_staff_index = 0
+    staff_menu_rects = {}
 
     running = True
     while running:
@@ -66,6 +71,12 @@ def main():
                             selected_anomaly_index = idx
                             break
 
+                elif current_page == "staff":
+                    for idx, rect in staff_menu_rects.items():
+                        if rect.collidepoint(mx, my):
+                            selected_staff_index = idx
+                            break
+
         # --- drawing ---
         screen.fill((20, 20, 25))
 
@@ -74,13 +85,9 @@ def main():
 
         # main content
         if current_page == "anomalies":
-            anomaly_menu_rects = draw_anomalies_page(
-                screen,
-                anomalies,
-                selected_anomaly_index,
-                CONTENT_X,
-                top_offset=TOP_BAR_HEIGHT,
-            )
+            anomaly_menu_rects = draw_anomalies_page(screen, anomalies, selected_anomaly_index, CONTENT_X, top_offset=TOP_BAR_HEIGHT)
+        elif current_page == "staff":
+            staff_menu_rects = draw_staff_page(screen, staff, selected_staff_index, CONTENT_X,top_offset=TOP_BAR_HEIGHT)
         else:
             anomaly_menu_rects = {}
 
