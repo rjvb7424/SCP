@@ -38,22 +38,6 @@ def draw_paragraph(surface, text, rect, font, color=(220, 220, 220)):
         line_surf = font.render(line, True, color)
         surface.blit(line_surf, (x, y))
 
-def draw_badge(surface, text, x, y, font,
-               bg=(60, 60, 90), fg=(230, 230, 230),
-               border=(140, 140, 200)):
-    padding_x, padding_y = 8, 3
-    text_surf = font.render(text, True, fg)
-    rect = text_surf.get_rect()
-    rect.topleft = (x, y)
-    rect.inflate_ip(padding_x * 2, padding_y * 2)
-
-    pygame.draw.rect(surface, bg, rect, border_radius=8)
-    pygame.draw.rect(surface, border, rect, width=1, border_radius=8)
-
-    text_rect = text_surf.get_rect(center=rect.center)
-    surface.blit(text_surf, text_rect)
-    return rect
-
 def draw_text(surface, text, x, y, font, color=(220, 220, 220)):
     """Draw a line of text and return the next y position."""
     text_surf = font.render(text, True, color)
