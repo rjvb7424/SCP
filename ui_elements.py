@@ -94,3 +94,28 @@ def draw_accept_button(surface, text, x, y, width, height):
 def draw_deny_button(surface, text, x, y, width, height):
     """Cancel action button."""
     return _draw_button(surface, text, x, y, width, height, DENY_BG, DENY_BG_HOVER, DENY_TEXT_COLOR, DENY_BORDER_COLOR,)
+
+def _lerp_color(c1, c2, t: float):
+    """Linearly interpolate between two RGB colors c1 -> c2 with t in [0, 1]."""
+    return tuple(int(c1[i] + (c2[i] - c1[i]) * t) for i in range(3))
+
+def get_attribute_color(value, lo=0, hi=20):
+    """Map each attribute value to a corresponding color."""
+    v = max(lo, min(hi, value))
+    norm = (v - lo) / (hi - lo)
+
+    red         = (220, 50, 50)
+    orange      = (230, 150, 50)
+    light_green = (180, 230, 100)
+    dark_green  = (20, 180, 80)
+
+    if norm < 1/3:
+        t = norm / (1/3)
+        return _lerp_color(red, orange, t)
+    elif norm < 2/3:
+        t = (norm - 1/3) / (1/3)
+        return _lerp_color(orange, light_green, t)
+    else:
+        t = (norm - 2/3) / (1/3)
+        return _lerp_color(light_green, dark_green, t)
+

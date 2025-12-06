@@ -1,3 +1,4 @@
+# anomaly.py
 import random
 import json
 
@@ -20,12 +21,24 @@ class Anomaly:
 
     def __init__(self):
         # identity
-        self.name = "The " + random.choice(self._names["adjectives"]) + " " + random.choice(self._names["nouns"])
+        self.name = (
+            "The "
+            + random.choice(self._names["adjectives"])
+            + " "
+            + random.choice(self._names["nouns"])
+        )
 
-        # generate attributes
-        self.attributes = {}
+        # attributes + knowledge
+        self.attributes = {}          # attr -> value
+        self.known_attributes = set() # subset of attr names we actually know
+
         for attr in self._all_attributes:
-            self.attributes[attr] = self._generate_gauss(mu=10, sigma=3, lo=0, hi=20)
+            value = self._generate_gauss(mu=10, sigma=3, lo=0, hi=20)
+            self.attributes[attr] = value
+
+            # 70% chance Foundation has solid data on this attribute
+            if random.random() < 0.7:
+                self.known_attributes.add(attr)
 
         # special containment procedures
         self.containment_procedures = "Standard containment procedures apply."
@@ -38,3 +51,14 @@ class Anomaly:
 
     def get_containment_procedures(self) -> str:
         return self.containment_procedures
+
+    def get_attribute_items(self):
+        """
+        Returns a list of (attribute_name, value, is_known) in a fixed order.
+        """
+        items = []
+        for attr in self._all_attributes:
+            value = self.attributes[attr]
+            known = attr in self.known_attributes
+            items.append((attr, value, known))
+        return items
