@@ -5,7 +5,7 @@ from anomalies_page import draw_anomalies_page
 from anomaly_page import draw_anomaly_page
 from anomaly import Anomaly
 from ui_elements import draw_title_text, draw_body_text, draw_primary_button, draw_secondary_button
-from sidebar import draw_sidebar
+from sidebar_menu import draw_sidebar
 
 def main():
     pygame.init()
@@ -13,6 +13,15 @@ def main():
     # get the current display resolution
     display_info = pygame.display.Info()
     WIDTH, HEIGHT = display_info.current_w, display_info.current_h
+
+    # pages in the sidebar
+    PAGES = [
+        ("anomalies", "Anomalies"),
+        ("anomaly",   "Anomaly Detail"),
+        ("research",  "Research"),
+        ("facility",  "Facility"),
+    ]
+    SIDEBAR_WIDTH = 200
 
     # create a window that starts "fullscreen" but is resizable
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
@@ -56,14 +65,14 @@ def main():
         if current_page == "anomalies":
             draw_anomalies_page(screen, anomalies)
         elif current_page == "anomaly":
-            draw_anomaly_page(screen, anomalies[0])
+            draw_anomaly_page(screen, anomalies[0], SIDEBAR_WIDTH + 20)
         elif current_page == "research":
-            draw_anomaly_page(screen, anomalies[1])
+            draw_anomaly_page(screen, anomalies[1], SIDEBAR_WIDTH + 20)
         elif current_page == "facility":
-            draw_anomaly_page(screen, anomalies[2])
+            draw_anomaly_page(screen, anomalies[2], SIDEBAR_WIDTH + 20)
 
         # draw sidebar last so it sits on top of the content
-        sidebar_button_rects = draw_sidebar(screen, current_page)
+        sidebar_button_rects = draw_sidebar(screen, SIDEBAR_WIDTH, current_page, PAGES)
 
         pygame.display.flip()
         clock.tick(60)
