@@ -1,21 +1,26 @@
-# external imports
+# sidebar_menu.py
 import pygame
-# internal imports
-from ui_elements import draw_title_text, draw_primary_button, draw_secondary_button
+from ui_elements import draw_title_text, draw_secondary_button, draw_primary_button
 
-def draw_sidebar(surface, sidebar_width, current_page, pages):
-    """Draws a navigation sidebar on the left and returns a dict of button rects."""
+def draw_sidebar(surface, sidebar_width, current_page, pages, top_offset=0):
+    """
+    pages: list of (page_id, label)
+    """
     height = surface.get_height()
 
-    # sidebar background
-    pygame.draw.rect(surface, (15, 15, 22), (0, 0, sidebar_width, height))
+    # sidebar background starts below the top bar
+    rect = pygame.Rect(0, top_offset, sidebar_width, height - top_offset)
+    pygame.draw.rect(surface, (15, 15, 22), rect)
+
     # vertical separator
-    pygame.draw.line(surface, (60, 60, 80), (sidebar_width, 0), (sidebar_width, height))
+    pygame.draw.line(surface, (60, 60, 80),
+                     (sidebar_width, top_offset),
+                     (sidebar_width, height))
 
     x = 16
-    y = 18
+    y = top_offset + 18
+
     y = draw_title_text(surface, "Navigation", x, y)
-    y+= 12
 
     button_width = sidebar_width - 2 * x
     button_height = 32
@@ -25,14 +30,12 @@ def draw_sidebar(surface, sidebar_width, current_page, pages):
 
     for page_id, label in pages:
         is_current = (page_id == current_page)
-        # page is currently selected, draw primary button style
         if is_current:
-            rect = draw_primary_button(surface, label, x, y, button_width, button_height)
-        # page is not selected, draw secondary button style
+            r = draw_primary_button(surface, label, x, y, button_width, button_height)
         else:
-            rect = draw_secondary_button(surface, label, x, y, button_width, button_height)
-        # store the button rect for event handling
-        rects[page_id] = rect
+            r = draw_secondary_button(surface, label, x, y, button_width, button_height)
+
+        rects[page_id] = r
         y += button_height + spacing
 
     return rects

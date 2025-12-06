@@ -63,10 +63,10 @@ def _draw_attributes(surface, anomaly, x, y_start):
     return y
 
 
-def draw_anomalies_page(surface, anomalies, selected_index, x):
-    """Draws the anomaly detail page and returns a dict of anomaly menu button rects."""
-    # initialise positions
-    menu_y = 16
+def draw_anomalies_page(surface, anomalies, selected_index, x, top_offset=0):
+    """Draws the anomaly page and returns a dict of anomaly menu button rects."""
+    # menu starts a bit below the top bar
+    menu_y = top_offset + 8
     button_width = 140
     button_height = 28
     spacing = 8
@@ -74,26 +74,26 @@ def draw_anomalies_page(surface, anomalies, selected_index, x):
     button_rects = {}
 
     button_x = x
-    # for each anomaly, draw a button in the menu
+    # --- top anomaly menu (tabs) ---
     for idx, anomaly in enumerate(anomalies):
         label = anomaly.get_name()
-        # truncate long names so buttons stay neat
         if len(label) > 18:
             label = label[:15] + "..."
+
         if idx == selected_index:
-            # highlight selected anomaly
-            rect = draw_primary_button(surface, label, button_x, menu_y, button_width, button_height)
+            rect = draw_primary_button(surface, label, button_x, menu_y,
+                                       button_width, button_height)
         else:
-            rect = draw_secondary_button(surface, label, button_x, menu_y, button_width, button_height)
-        # store button rect for event handling
+            rect = draw_secondary_button(surface, label, button_x, menu_y,
+                                         button_width, button_height)
+
         button_rects[idx] = rect
-        # increment x for next button
         button_x += button_width + spacing
 
-    # draw selected anomaly details
+    # --- selected anomaly details ---
     selected = anomalies[selected_index]
-    # gap before details
-    y = menu_y + button_height + 24 
+
+    y = menu_y + button_height + 24
 
     # anomaly name as title
     y = draw_title_text(surface, selected.get_name(), x, y)
@@ -103,7 +103,7 @@ def draw_anomalies_page(surface, anomalies, selected_index, x):
     y = draw_header_text(surface, "Special Containment Procedures:", x, y)
     y = draw_body_text(surface, selected.get_containment_procedures(), x, y)
 
-    # anomaly attributes
+    # attributes
     y += 12
     y = draw_header_text(surface, "Statistics:", x, y)
     y += 4

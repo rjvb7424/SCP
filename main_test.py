@@ -5,16 +5,15 @@ from anomalies_page import draw_anomalies_page
 from anomaly import Anomaly
 from ui_elements import draw_title_text, draw_body_text, draw_primary_button, draw_secondary_button
 from sidebar_menu import draw_sidebar
+from top_bar import draw_top_bar, TOP_BAR_HEIGHT
 
 
 def main():
     pygame.init()
 
-    # get the current display resolution
     display_info = pygame.display.Info()
     WIDTH, HEIGHT = display_info.current_w, display_info.current_h
 
-    # pages in the sidebar
     PAGES = [
         ("anomalies", "Anomalies"),
         ("anomaly",   "Anomaly Detail"),
@@ -22,48 +21,45 @@ def main():
         ("facility",  "Facility"),
     ]
     SIDEBAR_WIDTH = 200
-    CONTENT_X = SIDEBAR_WIDTH + 30  # where the anomaly page starts
+    CONTENT_X = SIDEBAR_WIDTH + 30
 
-    # create a window that starts "fullscreen" but is resizable
     screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("UI Button Test")
     clock = pygame.time.Clock()
 
-    # test data
     anomalies = [Anomaly() for _ in range(3)]
 
-    # which page are we on?
+    # dummy facility resources (swap later with real game state)
+    resources = {
+        "site_name": "Site-13",
+        "funds": 125000,
+        "staff": 23,
+        "date": "12 Mar 2031",
+    }
+
     current_page = "anomalies"
-
-    # store rects for sidebar buttons so we can detect clicks
     sidebar_button_rects = {}
-
-    # anomaly menu state
     selected_anomaly_index = 0
     anomaly_menu_rects = {}
 
     running = True
     while running:
-        # --- event handling ---
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
 
             elif event.type == pygame.VIDEORESIZE:
-                # when the window is resized, update the screen surface
                 new_width, new_height = event.w, event.h
                 screen = pygame.display.set_mode((new_width, new_height), pygame.RESIZABLE)
 
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mx, my = event.pos
 
-                # check sidebar button clicks
                 for page_id, rect in sidebar_button_rects.items():
                     if rect.collidepoint(mx, my):
                         current_page = page_id
                         break
 
-                # check anomaly top-menu clicks (only on anomalies page)
                 if current_page == "anomalies":
                     for idx, rect in anomaly_menu_rects.items():
                         if rect.collidepoint(mx, my):
@@ -71,17 +67,31 @@ def main():
                             break
 
         # --- drawing ---
-        screen.fill((20, 20, 25))  # background
+        screen.fill((20, 20, 25))
 
-        # main content (drawn behind the sidebar)
+        # global top bar (always visible)
+        draw_top_bar(screen, resources)
+
+        # main content
         if current_page == "anomalies":
-            anomaly_menu_rects = draw_anomalies_page(screen, anomalies, selected_anomaly_index, CONTENT_X)
+            anomaly_menu_rects = draw_anomalies_page(
+                screen,
+                anomalies,
+                selected_anomaly_index,
+                CONTENT_X,
+                top_offset=TOP_BAR_HEIGHT,
+            )
         else:
-            # no rects to track
             anomaly_menu_rects = {}
 
-        # draw sidebar last so it sits on top of the content
-        sidebar_button_rects = draw_sidebar(screen, SIDEBAR_WIDTH, current_page, PAGES)
+        # sidebar sits under the top bar
+        sidebar_button_rects = draw_sidebar(
+            screen,
+            SIDEBAR_WIDTH,
+            current_page,
+            PAGES,
+            top_offset=TOP_BAR_HEIGHT,
+        )
 
         pygame.display.flip()
         clock.tick(60)
