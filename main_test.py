@@ -1,7 +1,7 @@
 # external imports
 import pygame
 # internal imports
-from anomaly_page import draw_anomaly_page
+from anomalies_page import draw_anomalies_page
 from anomaly import Anomaly
 from ui_elements import draw_title_text, draw_body_text, draw_primary_button, draw_secondary_button
 from sidebar_menu import draw_sidebar
@@ -33,14 +33,14 @@ def main():
     anomalies = [Anomaly() for _ in range(3)]
 
     # which page are we on?
-    current_page = "anomalies"   # start on anomalies so you see the menu immediately
+    current_page = "anomalies"
 
     # store rects for sidebar buttons so we can detect clicks
     sidebar_button_rects = {}
 
     # anomaly menu state
-    selected_anomaly_index = 0            # which anomaly tab is active
-    anomaly_menu_rects = {}              # index -> button rect
+    selected_anomaly_index = 0
+    anomaly_menu_rects = {}
 
     running = True
     while running:
@@ -75,24 +75,9 @@ def main():
 
         # main content (drawn behind the sidebar)
         if current_page == "anomalies":
-            # THIS is your new page with the top menu
-            anomaly_menu_rects = draw_anomaly_page(
-                screen,
-                anomalies,
-                selected_anomaly_index,
-                CONTENT_X
-            )
-        elif current_page == "anomaly":
-            # if you still want a detail-only page, you can draw something else here
-            # for now, just show the currently selected anomaly without tabs:
-            anomaly_menu_rects = draw_anomaly_page(
-                screen,
-                anomalies,
-                selected_anomaly_index,
-                CONTENT_X
-            )
+            anomaly_menu_rects = draw_anomalies_page(screen, anomalies, selected_anomaly_index, CONTENT_X)
         else:
-            # no anomaly menu on other pages
+            # no rects to track
             anomaly_menu_rects = {}
 
         # draw sidebar last so it sits on top of the content
