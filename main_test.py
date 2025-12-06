@@ -7,13 +7,15 @@ from anomaly import Anomaly
 from ui_elements import draw_title_text, draw_body_text, draw_primary_button, draw_secondary_button
 from sidebar import draw_sidebar
 
-# constants
-WIDTH, HEIGHT = 800, 600
-
 def main():
     pygame.init()
 
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
+    # get the current display resolution
+    display_info = pygame.display.Info()
+    WIDTH, HEIGHT = display_info.current_w, display_info.current_h
+
+    # create a window that starts "fullscreen" but is resizable
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
     pygame.display.set_caption("UI Button Test")
     clock = pygame.time.Clock()
 
@@ -33,6 +35,11 @@ def main():
             if event.type == pygame.QUIT:
                 running = False
 
+            elif event.type == pygame.VIDEORESIZE:
+                # when the window is resized, update the screen surface
+                new_width, new_height = event.w, event.h
+                screen = pygame.display.set_mode((new_width, new_height), pygame.RESIZABLE)
+
             elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 mx, my = event.pos
 
@@ -42,18 +49,13 @@ def main():
                         current_page = page_id
                         break
 
-                # you can keep your other click logic here (for page-specific buttons)
-                # e.g. add anomaly buttons, etc.
-
         # --- drawing ---
         screen.fill((20, 20, 25))  # background
 
         # main content (drawn behind the sidebar)
         if current_page == "anomalies":
-            # your anomalies list page
             draw_anomalies_page(screen, anomalies)
         elif current_page == "anomaly":
-            # your single anomaly page
             draw_anomaly_page(screen, anomalies[0])
         elif current_page == "research":
             draw_anomaly_page(screen, anomalies[1])
