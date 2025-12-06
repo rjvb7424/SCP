@@ -4,22 +4,22 @@
     "languages": ["english"],
     "cities": [
       { "city": "New York City", "lat": 40.7, "lon": -74.0 },
-      { "city": "Los Angeles",   "lat": 34.1, "lon": -118.2 },
-      { "city": "Chicago",       "lat": 41.9, "lon": -87.6 },
-      { "city": "Houston",       "lat": 29.8, "lon": -95.4 },
-      { "city": "Miami",         "lat": 25.8, "lon": -80.2 },
-      { "city": "Seattle",       "lat": 47.6, "lon": -122.3 }
+      { "city": "Los Angeles", "lat": 34.1, "lon": -118.2 },
+      { "city": "Chicago", "lat": 41.9, "lon": -87.6 },
+      { "city": "Houston", "lat": 29.8, "lon": -95.4 },
+      { "city": "Miami", "lat": 25.8, "lon": -80.2 },
+      { "city": "Seattle", "lat": 47.6, "lon": -122.3 }
     ]
   },
   "Canada": {
     "nationality": "Canadian",
     "languages": ["english", "french"],
     "cities": [
-      { "city": "Toronto",   "lat": 43.7, "lon": -79.4 },
-      { "city": "Montreal",  "lat": 45.5, "lon": -73.6 },
+      { "city": "Toronto", "lat": 43.7, "lon": -79.4 },
+      { "city": "Montreal", "lat": 45.5, "lon": -73.6 },
       { "city": "Vancouver", "lat": 49.3, "lon": -123.1 },
-      { "city": "Calgary",   "lat": 51.0, "lon": -114.1 },
-      { "city": "Ottawa",    "lat": 45.4, "lon": -75.7 }
+      { "city": "Calgary", "lat": 51.0, "lon": -114.1 },
+      { "city": "Ottawa", "lat": 45.4, "lon": -75.7 }
     ]
   },
   "Mexico": {
@@ -28,20 +28,20 @@
     "cities": [
       { "city": "Mexico City", "lat": 19.4, "lon": -99.1 },
       { "city": "Guadalajara", "lat": 20.7, "lon": -103.3 },
-      { "city": "Monterrey",   "lat": 25.7, "lon": -100.3 },
-      { "city": "Tijuana",     "lat": 32.5, "lon": -117.0 },
-      { "city": "Cancún",      "lat": 21.2, "lon": -86.8 }
+      { "city": "Monterrey", "lat": 25.7, "lon": -100.3 },
+      { "city": "Tijuana", "lat": 32.5, "lon": -117.0 },
+      { "city": "Cancún", "lat": 21.2, "lon": -86.8 }
     ]
   },
   "Brazil": {
     "nationality": "Brazilian",
     "languages": ["portuguese"],
     "cities": [
-      { "city": "São Paulo",      "lat": -23.5, "lon": -46.6 },
+      { "city": "São Paulo", "lat": -23.5, "lon": -46.6 },
       { "city": "Rio de Janeiro", "lat": -22.9, "lon": -43.2 },
-      { "city": "Brasília",       "lat": -15.8, "lon": -47.9 },
-      { "city": "Salvador",       "lat": -12.9, "lon": -38.5 },
-      { "city": "Fortaleza",      "lat": -3.7,  "lon": -38.5 }
+      { "city": "Brasília", "lat": -15.8, "lon": -47.9 },
+      { "city": "Salvador", "lat": -12.9, "lon": -38.5 },
+      { "city": "Fortaleza", "lat": -3.7,  "lon": -38.5 }
     ]
   },
   "Argentina": {
@@ -49,21 +49,21 @@
     "languages": ["spanish"],
     "cities": [
       { "city": "Buenos Aires", "lat": -34.6, "lon": -58.4 },
-      { "city": "Córdoba",      "lat": -31.4, "lon": -64.2 },
-      { "city": "Rosario",      "lat": -32.9, "lon": -60.7 },
-      { "city": "Mendoza",      "lat": -32.9, "lon": -68.8 }
+      { "city": "Córdoba", "lat": -31.4, "lon": -64.2 },
+      { "city": "Rosario", "lat": -32.9, "lon": -60.7 },
+      { "city": "Mendoza", "lat": -32.9, "lon": -68.8 }
     ]
   },
   "United Kingdom": {
     "nationality": "British",
     "languages": ["english"],
     "cities": [
-      { "city": "London",     "lat": 51.5, "lon": -0.1 },
+      { "city": "London", "lat": 51.5, "lon": -0.1 },
       { "city": "Birmingham", "lat": 52.5, "lon": -1.9 },
       { "city": "Manchester", "lat": 53.5, "lon": -2.2 },
-      { "city": "Glasgow",    "lat": 55.9, "lon": -4.3 },
-      { "city": "Edinburgh",  "lat": 55.9, "lon": -3.2 },
-      { "city": "Leeds",  "lat": 53.8, "lon": -1.6 }
+      { "city": "Glasgow", "lat": 55.9, "lon": -4.3 },
+      { "city": "Edinburgh", "lat": 55.9, "lon": -3.2 },
+      { "city": "Leeds", "lat": 53.8, "lon": -1.6 }
     ]
   },
   "France": {
@@ -77,164 +77,106 @@
       { "city": "Nice", "lat": 43.7, "lon": 7.3 }
     ]
   },
-
   "Germany": {
     "nationality": "German",
     "languages": ["german"],
     "cities": [
-      { "city": "Berlin",    "lat": 52.5, "lon": 13.4 },
-      { "city": "Hamburg",   "lat": 53.6, "lon": 10.0 },
-      { "city": "Munich",    "lat": 48.1, "lon": 11.6 },
-      { "city": "Cologne",   "lat": 50.9, "lon": 6.9 },
+      { "city": "Berlin", "lat": 52.5, "lon": 13.4 },
+      { "city": "Hamburg", "lat": 53.6, "lon": 10.0 },
+      { "city": "Munich", "lat": 48.1, "lon": 11.6 },
+      { "city": "Cologne", "lat": 50.9, "lon": 6.9 },
       { "city": "Frankfurt", "lat": 50.1, "lon": 8.7 }
     ]
   },
-
   "Spain": {
     "nationality": "Spanish",
     "languages": ["spanish"],
     "cities": [
-      { "city": "Madrid",    "lat": 40.4, "lon": -3.7 },
+      { "city": "Madrid", "lat": 40.4, "lon": -3.7 },
       { "city": "Barcelona", "lat": 41.4, "lon": 2.2 },
-      { "city": "Valencia",  "lat": 39.5, "lon": -0.4 },
-      { "city": "Seville",   "lat": 37.4, "lon": -5.9 },
-      { "city": "Bilbao",    "lat": 43.3, "lon": -2.9 }
+      { "city": "Valencia", "lat": 39.5, "lon": -0.4 },
+      { "city": "Seville", "lat": 37.4, "lon": -5.9 },
+      { "city": "Bilbao", "lat": 43.3, "lon": -2.9 }
     ]
   },
-
   "Portugal": {
     "nationality": "Portuguese",
     "languages": ["portuguese"],
     "cities": [
-      { "city": "Lisbon",  "lat": 38.7, "lon": -9.1 },
-      { "city": "Porto",   "lat": 41.1, "lon": -8.6 },
+      { "city": "Lisbon", "lat": 38.7, "lon": -9.1 },
+      { "city": "Porto", "lat": 41.1, "lon": -8.6 },
       { "city": "Coimbra", "lat": 40.2, "lon": -8.4 },
-      { "city": "Braga",   "lat": 41.5, "lon": -8.4 },
-      { "city": "Faro",    "lat": 37.0, "lon": -7.9 }
+      { "city": "Braga", "lat": 41.5, "lon": -8.4 },
+      { "city": "Faro", "lat": 37.0, "lon": -7.9 }
     ]
   },
-
   "Italy": {
     "nationality": "Italian",
     "languages": ["italian"],
     "cities": [
-      { "city": "Rome",     "lat": 41.9, "lon": 12.5 },
-      { "city": "Milan",    "lat": 45.5, "lon": 9.2 },
-      { "city": "Naples",   "lat": 40.8, "lon": 14.3 },
-      { "city": "Turin",    "lat": 45.1, "lon": 7.7 },
+      { "city": "Rome", "lat": 41.9, "lon": 12.5 },
+      { "city": "Milan", "lat": 45.5, "lon": 9.2 },
+      { "city": "Naples", "lat": 40.8, "lon": 14.3 },
+      { "city": "Turin", "lat": 45.1, "lon": 7.7 },
       { "city": "Florence", "lat": 43.8, "lon": 11.3 },
-      { "city": "Venice",   "lat": 45.4, "lon": 12.3 }
+      { "city": "Venice", "lat": 45.4, "lon": 12.3 }
     ]
   },
-
   "Russia": {
     "nationality": "Russian",
     "languages": ["russian"],
     "cities": [
-      { "city": "Moscow",          "lat": 55.8, "lon": 37.6 },
-      { "city": "Saint Petersburg","lat": 59.9, "lon": 30.3 },
-      { "city": "Novosibirsk",     "lat": 55.0, "lon": 82.9 },
-      { "city": "Yekaterinburg",   "lat": 56.8, "lon": 60.6 },
-      { "city": "Kazan",           "lat": 55.8, "lon": 49.1 }
+      { "city": "Moscow", "lat": 55.8, "lon": 37.6 },
+      { "city": "Saint Petersburg", "lat": 59.9, "lon": 30.3 },
+      { "city": "Novosibirsk", "lat": 55.0, "lon": 82.9 },
+      { "city": "Yekaterinburg", "lat": 56.8, "lon": 60.6 },
+      { "city": "Kazan", "lat": 55.8, "lon": 49.1 }
     ]
   },
-
-  "Nigeria": {
-    "nationality": "Nigerian",
-    "languages": ["english", "hausa", "yoruba", "igbo"],
-    "cities": [
-      { "city": "Lagos",         "lat": 6.5,  "lon": 3.4 },
-      { "city": "Abuja",         "lat": 9.1,  "lon": 7.5 },
-      { "city": "Kano",          "lat": 12.0, "lon": 8.5 },
-      { "city": "Ibadan",        "lat": 7.4,  "lon": 3.9 },
-      { "city": "Port Harcourt", "lat": 4.8,  "lon": 7.0 }
-    ]
-  },
-
-  "South Africa": {
-    "nationality": "South African",
-    "languages": ["english", "afrikaans", "zulu", "xhosa"],
-    "cities": [
-      { "city": "Johannesburg", "lat": -26.2, "lon": 28.0 },
-      { "city": "Cape Town",    "lat": -33.9, "lon": 18.4 },
-      { "city": "Durban",       "lat": -29.9, "lon": 31.0 },
-      { "city": "Pretoria",     "lat": -25.7, "lon": 28.2 },
-      { "city": "Port Elizabeth","lat": -33.9, "lon": 25.6 }
-    ]
-  },
-
-  "Egypt": {
-    "nationality": "Egyptian",
-    "languages": ["arabic"],
-    "cities": [
-      { "city": "Cairo",          "lat": 30.0, "lon": 31.2 },
-      { "city": "Alexandria",     "lat": 31.2, "lon": 29.9 },
-      { "city": "Giza",           "lat": 29.9, "lon": 31.1 },
-      { "city": "Luxor",          "lat": 25.7, "lon": 32.6 },
-      { "city": "Sharm El Sheikh","lat": 27.9, "lon": 34.3 }
-    ]
-  },
-
-  "India": {
-    "nationality": "Indian",
-    "languages": ["hindi", "english"],
-    "cities": [
-      { "city": "New Delhi", "lat": 28.6, "lon": 77.2 },
-      { "city": "Mumbai",    "lat": 19.1, "lon": 72.9 },
-      { "city": "Bengaluru", "lat": 12.9, "lon": 77.6 },
-      { "city": "Kolkata",   "lat": 22.6, "lon": 88.4 },
-      { "city": "Chennai",   "lat": 13.1, "lon": 80.3 },
-      { "city": "Hyderabad", "lat": 17.4, "lon": 78.5 }
-    ]
-  },
-
   "China": {
     "nationality": "Chinese",
     "languages": ["mandarin"],
     "cities": [
-      { "city": "Beijing",   "lat": 39.9, "lon": 116.4 },
-      { "city": "Shanghai",  "lat": 31.2, "lon": 121.5 },
+      { "city": "Beijing", "lat": 39.9, "lon": 116.4 },
+      { "city": "Shanghai", "lat": 31.2, "lon": 121.5 },
       { "city": "Guangzhou", "lat": 23.1, "lon": 113.3 },
-      { "city": "Shenzhen",  "lat": 22.5, "lon": 114.1 },
-      { "city": "Chengdu",   "lat": 30.7, "lon": 104.1 },
-      { "city": "Wuhan",     "lat": 30.6, "lon": 114.3 }
+      { "city": "Shenzhen", "lat": 22.5, "lon": 114.1 },
+      { "city": "Chengdu", "lat": 30.7, "lon": 104.1 },
+      { "city": "Wuhan", "lat": 30.6, "lon": 114.3 }
     ]
   },
-
   "Japan": {
     "nationality": "Japanese",
     "languages": ["japanese"],
     "cities": [
-      { "city": "Tokyo",    "lat": 35.7, "lon": 139.7 },
-      { "city": "Osaka",    "lat": 34.7, "lon": 135.5 },
-      { "city": "Kyoto",    "lat": 35.0, "lon": 135.8 },
+      { "city": "Tokyo", "lat": 35.7, "lon": 139.7 },
+      { "city": "Osaka", "lat": 34.7, "lon": 135.5 },
+      { "city": "Kyoto", "lat": 35.0, "lon": 135.8 },
       { "city": "Yokohama", "lat": 35.4, "lon": 139.6 },
-      { "city": "Sapporo",  "lat": 43.1, "lon": 141.4 },
-      { "city": "Fukuoka",  "lat": 33.6, "lon": 130.4 }
+      { "city": "Sapporo", "lat": 43.1, "lon": 141.4 },
+      { "city": "Fukuoka", "lat": 33.6, "lon": 130.4 }
     ]
   },
-
   "South Korea": {
     "nationality": "South Korean",
     "languages": ["korean"],
     "cities": [
-      { "city": "Seoul",   "lat": 37.6, "lon": 126.9 },
-      { "city": "Busan",   "lat": 35.2, "lon": 129.1 },
+      { "city": "Seoul", "lat": 37.6, "lon": 126.9 },
+      { "city": "Busan", "lat": 35.2, "lon": 129.1 },
       { "city": "Incheon", "lat": 37.5, "lon": 126.6 },
-      { "city": "Daegu",   "lat": 35.9, "lon": 128.6 },
+      { "city": "Daegu", "lat": 35.9, "lon": 128.6 },
       { "city": "Daejeon", "lat": 36.4, "lon": 127.4 }
     ]
   },
-
   "Australia": {
     "nationality": "Australian",
     "languages": ["english"],
     "cities": [
-      { "city": "Sydney",    "lat": -33.9, "lon": 151.2 },
+      { "city": "Sydney", "lat": -33.9, "lon": 151.2 },
       { "city": "Melbourne", "lat": -37.8, "lon": 144.9 },
-      { "city": "Brisbane",  "lat": -27.5, "lon": 153.0 },
-      { "city": "Perth",     "lat": -31.9, "lon": 115.9 },
-      { "city": "Adelaide",  "lat": -34.9, "lon": 138.6 }
+      { "city": "Brisbane", "lat": -27.5, "lon": 153.0 },
+      { "city": "Perth", "lat": -31.9, "lon": 115.9 },
+      { "city": "Adelaide", "lat": -34.9, "lon": 138.6 }
     ]
   }
 }
