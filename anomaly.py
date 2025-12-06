@@ -7,8 +7,16 @@ class Anomaly:
         _names = json.load(f)
 
     _all_attributes = [
+        # administrative attributes
+        "leadership", "logistics", "planning",
         # combat attributes
-        "lethality", "deception", "physical_fitness",
+        "marksmanship", "situational_awareness", "physical_fitness",
+        # research attributes
+        "data_collection", "anomaly_knowledge", "analytical_thinking",
+        # mental attributes
+        "adaptability", "determination", "negotiation",
+        # medical attributes
+        "surgery", "psychology", "first_aid",
     ]
 
     @staticmethod
