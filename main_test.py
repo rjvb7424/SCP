@@ -1,7 +1,6 @@
 # external imports
 import pygame
 # internal imports
-from anomalies_page import draw_anomalies_page   # <- not used right now, can delete if you want
 from anomaly_page import draw_anomaly_page
 from anomaly import Anomaly
 from ui_elements import draw_title_text, draw_body_text, draw_primary_button, draw_secondary_button
