@@ -25,6 +25,15 @@ class Personnel:
         # medical attributes
         "surgery", "psychology", "first_aid",
     ]
+    def _generate_birth_date(self) -> str:
+        month = random.randint(1, 12)
+        if month == 2:
+            day = random.randint(1, 28)
+        elif month % 2 == 1:
+            day = random.randint(1, 31)
+        else:
+            day = random.randint(1, 30)
+        return day, month
 
     @staticmethod
     def _generate_gauss(mu: int, sigma: int, lo: int, hi: int) -> int:
@@ -46,6 +55,7 @@ class Personnel:
         # personnel identity
         self.gender = random.choice(["male", "female"])
         self.age = self._generate_gauss(mu=27, sigma=4, lo=22, hi=35)
+        self.date_of_birth = self._generate_birth_date()
 
         # select a random country of origin
         country_name = random.choice(list(self._countries.keys()))

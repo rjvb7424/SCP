@@ -1,5 +1,6 @@
 # external imports
 import pygame
+from datetime import date
 # internal imports
 from ui_elements import draw_title_text, draw_header_text, draw_body_text, draw_primary_button, draw_secondary_button, get_attribute_color
 from ui_elements import COLOR, BODY_FONT
@@ -97,6 +98,10 @@ def draw_staff_page(surface, staff, selected_index, x, top_offset=0):
     # anomaly name as title
     y = draw_title_text(surface, selected.get_full_name(), x, y)
     y += 10
+
+    # personnel identity
+    y = draw_body_text(surface, f"Date of birth: {selected.date_of_birth[0]:02d}/{selected.date_of_birth[1]:02d} (Age {selected.age})", x, y)
+    y = draw_body_text(surface, f"Place of birth: {selected.city_of_birth}, {selected.country}", x, y)
 
     # attributes
     y += 12
