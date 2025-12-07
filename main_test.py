@@ -9,7 +9,7 @@ from top_bar import draw_top_bar, TOP_BAR_HEIGHT
 from staff_page import draw_staff_page
 from personnel import Personnel
 from operations_page import draw_operations_page
-from simple_operations import operations
+from simple_operations import Operation
 
 
 def main():
@@ -32,6 +32,7 @@ def main():
 
     anomalies = [Anomaly() for _ in range(3)]
     staff = [Personnel() for _ in range(5)]
+    operations = [Operation() for _ in range(10)]
 
     # dummy facility resources (swap later with real game state)
     resources = {

@@ -170,10 +170,9 @@ def draw_operations_page(surface, operations, selected_index, x, top_offset=0):
     city    = getattr(selected, "city", "Unknown City")
     country = getattr(selected, "country", "Unknown Country")
     risk    = getattr(selected, "risk", "Unknown Risk")
-    priority = getattr(selected, "priority", "Unknown Priority")
 
     y = draw_body_text(surface, f"Location: {city}, {country}", text_x, y)
-    y = draw_body_text(surface, f"Risk: {risk} | Priority: {priority}", text_x, y)
+    y = draw_body_text(surface, f"Risk: {risk}", text_x, y)
     y += 10
 
     y = draw_header_text(surface, "Briefing:", text_x, y)
