@@ -85,7 +85,7 @@ def main():
                             break
 
                 elif current_page == "operations":
-                    # click on operation tabs
+                    # click on operation markers
                     for idx, rect in operation_menu_rects.items():
                         if rect.collidepoint(mx, my):
                             selected_operation_index = idx
@@ -95,7 +95,6 @@ def main():
                     if launch_button_rect and launch_button_rect.collidepoint(mx, my):
                         op = operations[selected_operation_index]
                         print(f"Launching operation: {op.codename}")
-                        # later: swap to an execution screen, change status, etc.
 
         # --- drawing ---
         screen.fill((20, 20, 25))
