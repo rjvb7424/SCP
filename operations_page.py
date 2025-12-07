@@ -21,18 +21,11 @@ def _get_world_map():
             _world_map_image = None
     return _world_map_image
 
-
-def project_lat_lon_on_image(lat, lon, img_x, img_y, img_w, img_h):
-    """
-    Map latitude/longitude onto the *scaled image* that starts at (img_x, img_y)
-    and has size img_w x img_h.
-    lat:  -90 .. +90
-    lon: -180 .. +180
-    """
+def project_coords_on_image(lat, lon, img_x, img_y, img_w, img_h):
+    """Convert lat/lon to x/y pixel coordinates on a given image area."""
     x = img_x + (lon + 180.0) / 360.0 * img_w
     y = img_y + (90.0 - lat) / 180.0 * img_h
     return int(x), int(y)
-
 
 def _priority_color(priority):
     """Very simple color mapping based on priority string or number."""
@@ -147,7 +140,7 @@ def draw_operations_page(surface, operations, selected_index, x, top_offset=0):
             my = map_rect.top + (90.0 - lat) / 180.0 * map_rect.height
             mx, my = int(mx), int(my)
         else:
-            mx, my = project_lat_lon_on_image(lat, lon, img_x, img_y, img_w, img_h)
+            mx, my = project_coords_on_image(lat, lon, img_x, img_y, img_w, img_h)
 
         if not map_rect.collidepoint(mx, my):
             continue
