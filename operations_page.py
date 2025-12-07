@@ -1,27 +1,20 @@
-# operations_page.py
+# external imports
 import pygame
-from ui_elements import (
-    draw_title_text,
-    draw_header_text,
-    draw_body_text,
-    draw_primary_button,
-)
+# internal imports
+from ui_elements import draw_title_text, draw_header_text, draw_body_text, draw_primary_button
 
-# Lazy-loaded global map
+# cached world map image
 _world_map_image = None
-
-
 def _get_world_map():
-    """Load world_map.jpg once. Safe even if called before set_mode."""
+    """Load the image for the world map once. Safe even if called before set_mode."""
     global _world_map_image
+    # if already loaded, return cached version
     if _world_map_image is None:
         try:
-            img = pygame.image.load("world_map.jpg")  # no convert yet
-
+            img = pygame.image.load("world_map.jpg")
             # Only convert if a display surface exists
             if pygame.display.get_surface() is not None:
                 img = img.convert()
-
             _world_map_image = img
         except Exception as e:
             print("Warning: could not load world_map.jpg:", e)
