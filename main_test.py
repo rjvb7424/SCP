@@ -8,6 +8,8 @@ from sidebar_menu import draw_sidebar
 from top_bar import draw_top_bar, TOP_BAR_HEIGHT
 from staff_page import draw_staff_page
 from personnel import Personnel
+from operations_page import draw_operations_page
+from simple_operations import operations
 
 
 def main():
@@ -19,6 +21,7 @@ def main():
     PAGES = [
         ("staff", "Staff"),
         ("anomalies", "Anomalies"),
+        ("operations", "Operations"),
     ]
     SIDEBAR_WIDTH = 200
     CONTENT_X = SIDEBAR_WIDTH + 30
@@ -38,7 +41,7 @@ def main():
         "date": "12 Mar 2031",
     }
 
-    current_page = "anomalies"
+    current_page = "staff"
     sidebar_button_rects = {}
 
     selected_anomaly_index = 0
@@ -46,6 +49,10 @@ def main():
 
     selected_staff_index = 0
     staff_menu_rects = {}
+
+    selected_operation_index = 0
+    operation_menu_rects = {}
+    launch_button_rect = None
 
     running = True
     while running:
@@ -77,6 +84,19 @@ def main():
                             selected_staff_index = idx
                             break
 
+                elif current_page == "operations":
+                    # click on operation tabs
+                    for idx, rect in operation_menu_rects.items():
+                        if rect.collidepoint(mx, my):
+                            selected_operation_index = idx
+                            break
+
+                    # click on Launch button
+                    if launch_button_rect and launch_button_rect.collidepoint(mx, my):
+                        op = operations[selected_operation_index]
+                        print(f"Launching operation: {op.codename}")
+                        # later: swap to an execution screen, change status, etc.
+
         # --- drawing ---
         screen.fill((20, 20, 25))
 
@@ -85,11 +105,25 @@ def main():
 
         # main content
         if current_page == "anomalies":
-            anomaly_menu_rects = draw_anomalies_page(screen, anomalies, selected_anomaly_index, CONTENT_X, top_offset=TOP_BAR_HEIGHT)
+            anomaly_menu_rects = draw_anomalies_page(
+                screen, anomalies, selected_anomaly_index, CONTENT_X,
+                top_offset=TOP_BAR_HEIGHT
+            )
         elif current_page == "staff":
-            staff_menu_rects = draw_staff_page(screen, staff, selected_staff_index, CONTENT_X,top_offset=TOP_BAR_HEIGHT)
+            staff_menu_rects = draw_staff_page(
+                screen, staff, selected_staff_index, CONTENT_X,
+                top_offset=TOP_BAR_HEIGHT
+            )
+        elif current_page == "operations":
+            operation_menu_rects, launch_button_rect = draw_operations_page(
+                screen, operations, selected_operation_index, CONTENT_X,
+                top_offset=TOP_BAR_HEIGHT
+            )
         else:
             anomaly_menu_rects = {}
+            staff_menu_rects = {}
+            operation_menu_rects = {}
+            launch_button_rect = None
 
         # sidebar sits under the top bar
         sidebar_button_rects = draw_sidebar(
