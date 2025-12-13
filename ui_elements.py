@@ -104,10 +104,10 @@ def get_attribute_color(value, lo=0, hi=20):
     v = max(lo, min(hi, value))
     norm = (v - lo) / (hi - lo)
 
-    red         = (220, 50, 50)
-    orange      = (230, 150, 50)
+    red = (220, 50, 50)
+    orange = (230, 150, 50)
     light_green = (180, 230, 100)
-    dark_green  = (20, 180, 80)
+    dark_green = (20, 180, 80)
 
     if norm < 1/3:
         t = norm / (1/3)
