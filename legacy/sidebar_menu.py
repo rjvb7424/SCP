@@ -1,6 +1,6 @@
 # sidebar_menu.py
 import pygame
-from ui_elements import draw_title_text, draw_secondary_button, draw_primary_button
+from rework.ui_elements import draw_title_text, draw_secondary_button, draw_primary_button
 
 def draw_sidebar(surface, sidebar_width, current_page, pages, top_offset=0):
     """

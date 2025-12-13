@@ -3,7 +3,7 @@ import pygame
 # internal imports
 from anomalies_page import draw_anomalies_page
 from anomaly import Anomaly
-from ui_elements import draw_title_text, draw_body_text, draw_primary_button, draw_secondary_button
+from rework.ui_elements import draw_title_text, draw_body_text, draw_primary_button, draw_secondary_button
 from sidebar_menu import draw_sidebar
 from top_bar import draw_top_bar, TOP_BAR_HEIGHT
 from staff_page import draw_staff_page

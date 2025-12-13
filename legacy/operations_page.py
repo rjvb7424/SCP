@@ -1,7 +1,7 @@
 # external imports
 import pygame
 # internal imports
-from ui_elements import draw_title_text, draw_header_text, draw_body_text, draw_primary_button
+from rework.ui_elements import draw_title_text, draw_header_text, draw_body_text, draw_primary_button
 
 # cached world map image
 _world_map_image = None

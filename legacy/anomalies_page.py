@@ -1,9 +1,8 @@
 # external imports
 import pygame
-from datetime import date
 # internal imports
-from ui_elements import draw_title_text, draw_header_text, draw_body_text, draw_footer_text, draw_primary_button, draw_secondary_button, get_attribute_color
-from ui_elements import COLOR, BODY_FONT
+from rework.ui_elements import draw_title_text, draw_header_text, draw_body_text, draw_primary_button, draw_secondary_button, get_attribute_color
+from rework.ui_elements import COLOR, BODY_FONT
 
 def _draw_attributes(surface, anomaly, x, y_start):
     """Draws the anomaly attributes table and returns the new y position."""
@@ -64,8 +63,8 @@ def _draw_attributes(surface, anomaly, x, y_start):
     return y
 
 
-def draw_staff_page(surface, staff, selected_index, x, top_offset=0):
-    """Draws the staff page and returns a dict of staff menu button rects."""
+def draw_anomalies_page(surface, anomalies, selected_index, x, top_offset=0):
+    """Draws the anomaly page and returns a dict of anomaly menu button rects."""
     # menu starts a bit below the top bar
     menu_y = top_offset + 8
     button_width = 140
@@ -75,36 +74,37 @@ def draw_staff_page(surface, staff, selected_index, x, top_offset=0):
     button_rects = {}
 
     button_x = x
-    # for each staff memeber draw a button
-    for idx, personnel in enumerate(staff):
-        label = personnel.get_full_name()
-        # truncate if the name is too long
+    # --- top anomaly menu (tabs) ---
+    for idx, anomaly in enumerate(anomalies):
+        label = anomaly.get_name()
         if len(label) > 18:
             label = label[:15] + "..."
-        # highlight if selected
+
         if idx == selected_index:
-            rect = draw_primary_button(surface, label, button_x, menu_y,button_width, button_height)
+            rect = draw_primary_button(surface, label, button_x, menu_y,
+                                       button_width, button_height)
         else:
-            rect = draw_secondary_button(surface, label, button_x, menu_y,button_width, button_height)
+            rect = draw_secondary_button(surface, label, button_x, menu_y,
+                                         button_width, button_height)
 
         button_rects[idx] = rect
         button_x += button_width + spacing
-    
-    # draw selected staff details
-    selected = staff[selected_index]
+
+    # --- selected anomaly details ---
+    selected = anomalies[selected_index]
 
     y = menu_y + button_height + 24
 
-    # personnel name as title
-    y = draw_title_text(surface, selected.get_full_name(), x, y)
-    y += 10
-    y = draw_header_text(surface, f"{selected.position}", x, y)
-    y += 10
-    y = draw_body_text(surface, f"Date of birth: {selected.date_of_birth[0]:02d}/{selected.date_of_birth[1]:02d} (Age {selected.age})", x, y)
-    y = draw_body_text(surface, f"Place of birth: {selected.city_of_birth}, {selected.country}", x, y)
+    # anomaly name as title
+    y = draw_title_text(surface, selected.get_name(), x, y)
     y += 10
 
+    # containment procedures
+    y = draw_header_text(surface, "Special Containment Procedures:", x, y)
+    y = draw_body_text(surface, selected.get_containment_procedures(), x, y)
+
     # attributes
+    y += 12
     y = draw_header_text(surface, "Statistics:", x, y)
     y += 4
     y = _draw_attributes(surface, selected, x, y)

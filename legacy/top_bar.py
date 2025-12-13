@@ -1,6 +1,6 @@
 # top_bar.py
 import pygame
-from ui_elements import BODY_FONT, HEADER_FONT, COLOR
+from rework.ui_elements import BODY_FONT, HEADER_FONT, COLOR
 
 TOP_BAR_HEIGHT = 40  # pixels
 
