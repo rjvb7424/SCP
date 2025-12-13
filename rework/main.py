@@ -962,16 +962,16 @@ class Anomaly(Entity):
 # Operation Simulation
 # ==========================
 class OperationSim:
-    def __init__(self, map_w=52, map_h=34, tile=20):
+    def __init__(self, map_w=52, map_h=34, tile=20, screen=None):
         self.map_w = map_w
         self.map_h = map_h
         self.tile = tile
-
         self.panel_w = 380
+
         self.screen_w = self.map_w * self.tile + self.panel_w
         self.screen_h = self.map_h * self.tile
 
-        self.screen = pygame.display.set_mode((self.screen_w, self.screen_h))
+        self.screen = screen or pygame.display.set_mode((self.screen_w, self.screen_h))
         pygame.display.set_caption("Operation Simulation - Facility Containment")
 
         self.clock = pygame.time.Clock()
@@ -1467,11 +1467,15 @@ class OperationSim:
 
 def main():
     pygame.init()
-    random.seed()
-    sim = OperationSim(map_w=52, map_h=34, tile=20)
+    info = pygame.display.Info()
+    WIDTH, HEIGHT = info.current_w, info.current_h
+
+    screen = pygame.display.set_mode((WIDTH, HEIGHT), pygame.RESIZABLE)
+    pygame.display.set_caption("UI Button Test")
+
+    sim = OperationSim(map_w=52, map_h=34, tile=20, screen=screen)
     sim.run()
     pygame.quit()
-
 
 if __name__ == "__main__":
     main()
